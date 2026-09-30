@@ -325,7 +325,7 @@ function getLovePrompt(u) {
 * 출생 지역 : ${u.birthRegion}
 
 너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘.  사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
-정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘.
+정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
 
 - 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
 - 나의 연애 스타일을 분석해줘.
@@ -347,7 +347,7 @@ function getTodayPrompt(u) {
 * 출생 지역 : ${u.birthRegion}
 
 너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
-정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘.
+정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
 
 - 행운의 컬러와 행운의 숫자를 분석해줘.
 - 오늘의 행운의 아이템을 추천해줘.
@@ -373,7 +373,7 @@ function sanitizePromptText(text) {
 }
 
 // 지수 백오프(Exponential Backoff) 기반 API 호출
-async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-flash-latest", maxRetries = 2) {
+async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-flash-lite-latest", maxRetries = 2) {
     const cleanPrompt = sanitizePromptText(promptText);
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     
@@ -416,17 +416,17 @@ async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-fl
     return null;
 }
 
-// 안전한 Gemini API 통합 호출 (주 모델 gemini-flash-latest -> 경량 보조 모델 gemini-flash-lite-latest 순차 시도)
+// 안전한 Gemini API 통합 호출 (주 모델 gemini-flash-lite-latest -> 경량 보조 모델 gemini-2.5-flash-lite 순차 시도)
 async function callGeminiSafe(promptText, apiKey) {
     if (!apiKey) return null;
     
-    // 1차 시도: gemini-flash-latest
-    let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-latest", 2);
+    // 1차 시도: gemini-flash-lite-latest (빠른 처리 속도)
+    let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-lite-latest", 2);
     
-    // 2차 시도 (Fallback): gemini-flash-lite-latest
+    // 2차 시도 (Fallback): gemini-2.5-flash-lite
     if (!result) {
-        console.warn("메인 모델(gemini-flash-latest) 호출 실패 -> 경량 Fallback 모델(gemini-flash-lite-latest)로 전환 중...");
-        result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-lite-latest", 2);
+        console.warn("메인 모델(gemini-flash-lite-latest) 호출 실패 -> 경량 Fallback 모델(gemini-2.5-flash-lite)로 전환 중...");
+        result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.5-flash-lite", 2);
     }
     
     return result;
