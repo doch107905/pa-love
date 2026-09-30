@@ -2,19 +2,24 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>연분청 : 인연을 행정하다</title>
     <!-- 정통 사주 만세력 계산 라이브러리 연동 -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.8/lunar.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap');
 
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             font-family: 'Gowun Batang', serif;
             background-color: #f4efe6;
             color: #2c221e;
             margin: 0;
-            padding: 20px;
+            padding: 12px 8px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,28 +29,28 @@
         }
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             background: #fcf9f2;
-            padding: 40px 25px;
+            padding: 30px 18px;
             border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(44, 34, 30, 0.12);
+            box-shadow: 0 6px 20px rgba(44, 34, 30, 0.12);
             border: 2px solid #5a3e36;
-            box-sizing: border-box;
             text-align: center;
             position: relative;
         }
         h1 {
             color: #5a3e36;
+            margin-top: 0;
             margin-bottom: 5px;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
         }
         .subtitle {
-            font-size: 15px;
+            font-size: 14px;
             color: #8c6d62;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
+            margin-bottom: 22px;
+            letter-spacing: 0.5px;
         }
         .step {
             display: none;
@@ -54,7 +59,7 @@
             display: block;
         }
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             text-align: left;
         }
         label {
@@ -64,31 +69,48 @@
             color: #5a3e36;
             font-size: 13px;
         }
+        
+        /* 모바일 자동 확대 방지 (font-size: 16px) & 터치 영역 개선 */
         input, select, textarea {
             width: 100%;
-            padding: 11px;
+            padding: 12px 10px;
             border: 1px solid #b8a99a;
             background: #fff;
             border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
+            font-size: 16px; 
             font-family: 'Gowun Batang', serif;
             text-align: center;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%205a3e36' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px;
         }
         button {
             width: 100%;
             background-color: #5a3e36;
             color: #fcf9f2;
             border: none;
-            padding: 14px;
+            padding: 14px 10px;
             font-size: 15px;
             font-weight: bold;
             font-family: 'Gowun Batang', serif;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
             margin-top: 10px;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:active {
+            transform: scale(0.98);
         }
         button:hover {
             background-color: #3f2a24;
@@ -102,7 +124,7 @@
         .highlight-box {
             background: #f4efe6;
             border: 1px dashed #5a3e36;
-            padding: 20px;
+            padding: 18px 14px;
             border-radius: 8px;
             margin: 15px 0;
             font-size: 13.5px;
@@ -110,34 +132,37 @@
             color: #3d2c25;
             text-align: left;
             white-space: pre-line;
+            word-break: keep-all;
         }
         .info-card {
             background: #f4efe6;
-            padding: 14px;
+            padding: 12px 14px;
             border-radius: 6px;
             margin-bottom: 12px;
             text-align: left;
             font-size: 13px;
             line-height: 1.6;
             border-left: 3px solid #5a3e36;
+            word-break: keep-all;
         }
         .box-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 20px;
+            gap: 8px;
+            margin-top: 16px;
         }
         .element-btn {
             background-color: #fff;
             border: 1.5px solid #5a3e36;
             color: #5a3e36;
-            padding: 15px;
+            padding: 12px 8px;
             font-size: 14px;
             font-weight: bold;
             font-family: 'Gowun Batang', serif;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
+            min-height: 52px;
         }
         .element-btn:hover, .element-btn.selected {
             background-color: #5a3e36;
@@ -147,44 +172,48 @@
             grid-column: span 2;
         }
         .partner-list-container {
-            max-height: 300px;
+            max-height: 280px;
             overflow-y: auto;
             margin-top: 15px;
             text-align: left;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* 전통 서식 스타일 */
+        /* 전통 서식 반응형 스타일 */
         .registration-paper {
             background: #f7f2e8;
             border: 2px double #8c6d62;
             border-radius: 8px;
-            padding: 22px 18px;
+            padding: 18px 12px;
             margin-bottom: 15px;
             position: relative;
             box-shadow: inset 0 0 15px rgba(90, 62, 54, 0.05);
         }
         .paper-title-decor {
-            font-size: 12px;
+            font-size: 11px;
             color: #8c6d62;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            word-break: keep-all;
         }
         .trad-form-row {
             display: flex;
             align-items: center;
-            margin-bottom: 14px;
-            gap: 8px;
+            margin-bottom: 12px;
+            gap: 6px;
         }
         .trad-label {
-            min-width: 110px;
+            min-width: 95px;
+            max-width: 105px;
             background: #fff;
             border: 1px solid #b8a99a;
             border-radius: 20px;
-            padding: 5px 10px;
-            font-size: 12px;
+            padding: 5px 8px;
+            font-size: 11.5px;
             color: #5a3e36;
             font-weight: bold;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            flex-shrink: 0;
         }
         .trad-input {
             flex: 1;
@@ -192,8 +221,8 @@
             border-bottom: 1px solid #8c6d62;
             background: transparent;
             border-radius: 0;
-            padding: 5px;
-            font-size: 13.5px;
+            padding: 6px 4px;
+            font-size: 15px;
             text-align: left;
             color: #2c221e;
         }
@@ -207,22 +236,23 @@
             background: #fff;
             border: 1px solid #8c6d62;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 14px 12px;
+            margin-bottom: 12px;
             text-align: left;
             font-size: 13px;
             line-height: 1.8;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            word-break: keep-all;
         }
         .partner-profile-card h3 {
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
             color: #5a3e36;
-            font-size: 17px;
+            font-size: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border-bottom: 1px dashed #b8a99a;
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .admin-link-btn {
@@ -235,6 +265,7 @@
             text-decoration: underline;
             padding: 0;
             width: auto;
+            min-height: auto;
             font-family: 'Gowun Batang', serif;
         }
         .admin-link-btn:hover {
@@ -242,20 +273,21 @@
         }
         .admin-section {
             text-align: left;
-            max-height: 380px;
+            max-height: 350px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .element-category {
             background: #f4efe6;
             border: 1px solid #dcd5c9;
             border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         .element-category h4 {
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             color: #5a3e36;
-            font-size: 14px;
+            font-size: 13px;
             border-bottom: 1px dashed #b8a99a;
             padding-bottom: 4px;
         }
@@ -279,6 +311,7 @@
             border-radius: 4px;
             cursor: pointer;
             width: auto;
+            min-height: auto;
             margin: 0;
         }
         .delete-btn:hover {
@@ -287,8 +320,35 @@
         .loading-spinner {
             font-weight: bold;
             color: #b85d38;
-            padding: 25px;
+            padding: 20px 10px;
             line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* 오프라인 궁합 2컬럼 레이아웃 모바일 대응 */
+        .offline-compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* 초소형 모바일 화면 (360px 이하) 미디어 쿼리 */
+        @media (max-width: 380px) {
+            .container {
+                padding: 22px 12px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .trad-label {
+                min-width: 85px;
+                font-size: 11px;
+                padding: 4px 4px;
+            }
+            .offline-compare-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -300,7 +360,7 @@
     <div id="step1" class="step active">
         <h1>연분청</h1>
         <div class="subtitle">인연을 행정하다</div>
-        <p style="color: #6c584c; font-size: 14px; margin-bottom: 25px; line-height: 1.6;">
+        <p style="color: #6c584c; font-size: 13.5px; margin-bottom: 20px; line-height: 1.6; word-break: keep-all;">
             사주오행을 통해 운명의 짝을 찾아드리는<br>조선시대 최고의 인연 매칭 관청 📜✨
         </p>
         <button onclick="showStep('step2')">시작하기 (참가자)</button>
@@ -325,7 +385,7 @@
     <div id="step2_result" class="step">
         <h1>기운 확인 완료</h1>
         <div class="highlight-box" id="elementResultText"></div>
-        <p style="font-size:14px; color:#5a3e36; font-weight:bold; margin:20px 0 10px 0;">원하시는 서비스를 선택해주소서</p>
+        <p style="font-size:13.5px; color:#5a3e36; font-weight:bold; margin:16px 0 8px 0;">원하시는 서비스를 선택해주소서</p>
         <button onclick="showStep('step_today_form')" style="background-color: #8c6d62;">🔮 오늘의 운세만 보기</button>
         <button onclick="showStep('step_match_form')" style="background-color: #5a3e36; margin-top:8px;">📜 인연등록서 작성하여 인연 찾기</button>
     </div>
@@ -393,7 +453,7 @@
         <button class="btn-secondary" onclick="showStep('step2_result')" style="margin-top:5px;">뒤로 가기</button>
     </div>
 
-    <!-- 2-A 결과. 오늘의 운세 결과 화면 (오프라인 궁합 버튼 추가) -->
+    <!-- 2-A 결과. 오늘의 운세 결과 화면 -->
     <div id="step_today_result" class="step">
         <h1>🔮 오늘의 운세 감정 결과</h1>
         <div class="subtitle">2026년 10월 1일 기준 사주 운세이옵니다</div>
@@ -404,7 +464,6 @@
 
         <div id="todayResultBox" class="highlight-box" style="display:none;"></div>
 
-        <!-- 오프라인용 대상자 조회 버튼 -->
         <button onclick="goToOfflineTargetSearch('today')" style="background-color: #6e534a; margin-top: 8px;">📜 오프라인용 대상자 조회하고 궁합 보기</button>
         <button onclick="location.reload()" style="background-color: #8c6d62; margin-top: 5px;">처음으로 돌아가기</button>
     </div>
@@ -487,7 +546,7 @@
                 <input type="text" id="userEmoji" class="trad-input" placeholder="예: 🌸, 🌿, 🔥" maxlength="2">
             </div>
 
-            <div class="trad-textarea-block" style="text-align:left; margin-top:15px;">
+            <div class="trad-textarea-block" style="text-align:left; margin-top:12px;">
                 <div class="trad-label" style="display:inline-block;">🏵️ 하고싶은 말</div>
                 <textarea id="userIntro" class="trad-input" style="width:100%; height:70px; border:1px solid #b8a99a; background:#fff; border-radius:6px; margin-top:6px; padding:8px;" placeholder="상대방에게 전달하고 싶은 한마디나 이상형을 적어주소서."></textarea>
             </div>
@@ -497,7 +556,7 @@
         <button class="btn-secondary" onclick="showStep('step2_result')" style="margin-top:5px;">뒤로 가기</button>
     </div>
 
-    <!-- 2-B 결과. AI 연애운 & 오늘의 운세 분석 결과 화면 (오프라인 궁합 버튼 추가) -->
+    <!-- 2-B 결과. AI 연애운 & 오늘의 운세 분석 결과 화면 -->
     <div id="step_match_ai" class="step">
         <h1>🔮 사주 심층 분석 (연애운 & 운세)</h1>
         <div class="subtitle">30년 경력 대가가 심층 분석한 사주 감정이옵니다</div>
@@ -513,7 +572,6 @@
             <div class="highlight-box" id="aiTodayResult"></div>
 
             <button style="background-color: #5a3e36; margin-top: 15px;" onclick="showStep('step4')">오행 상자 고르러 가기 ➔</button>
-            <!-- 오프라인용 대상자 조회 버튼 -->
             <button onclick="goToOfflineTargetSearch('match')" style="background-color: #6e534a; margin-top: 8px;">📜 오프라인용 대상자 조회하고 궁합 보기</button>
         </div>
     </div>
@@ -654,7 +712,7 @@
         <h1>📜 오프라인 운명 궁합 결과지</h1>
         <div class="subtitle">사주명리학으로 풀어낸 두 사람의 만남과 기운이옵니다</div>
 
-        <!-- 두 사람의 프로필 -->
+        <!-- 두 사람 프로필 (모바일 반응형 그리드 적용) -->
         <div id="offlineProfilesArea"></div>
 
         <!-- 상세 궁합 해설 -->
@@ -1029,9 +1087,9 @@
 
         const target = offlineTargetUser;
 
-        // 두 사람 프로필
+        // 두 사람 프로필 (반응형 2컬럼 레이아웃)
         document.getElementById('offlineProfilesArea').innerHTML = `
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div class="offline-compare-grid">
                 <div class="partner-profile-card" style="margin-bottom:0; font-size:12px;">
                     <h3 style="font-size:14px;">👤 ${applicantUser.name} (본인)</h3>
                     <b>• 오행:</b> ${applicantUser.element}<br>
@@ -1081,7 +1139,7 @@
         } else {
             score = Math.floor(Math.random() * 11) + 76;
             relationTitle = "상극(相克) - 강렬하게 사로잡히는 묘연";
-            paragraph1 = `<b>${applicantUser.name}</b> 님과 <b>${target.name}</b> 님의 기운은 사주 명리학에서 서로에게 강한 자극과 견제를 주는 '상극(相克)'의 관계입니다. 그러나 상극은 부딪힘에 그치지 않고, 나에게 없는 완벽히 새로운 상반된 매력에 강렬하게 끌리는 '묘연(妙緣)'의 상징이옵니다.`;
+            paragraph1 = `<b>${applicantUser.name}</b> 님과 <b>${target.name}</b> 님의 기운은 사주 명리학에서 서로에게 강한 자극과 견제를 주는 '상극(相克)'의 관계입니다. 그러나 상극은 부딪힘에 그치지 않고, 나에게 없는 완벽히 상반된 매력에 강렬하게 끌리는 '묘연(妙緣)'의 상징이옵니다.`;
             paragraph2 = `서로 다른 성향이 선사하는 긴장감과 신선함이 오프라인 만남에서 커다란 매력 포인트로 작용하므로, 상대방의 다름을 존중하고 접근한다면 어떤 인연보다 극적인 로맨스를 완성하게 될 것입니다.`;
         }
 
