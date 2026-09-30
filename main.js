@@ -359,8 +359,78 @@ function getTodayPrompt(u) {
 }
 
 // ==========================================
-// 3. AI 및 폼 제출 처리 (순차 호출 + 1초 지연)
+// 3. API 전처리, Exponential Backoff 및 Fallback 구현
 // ==========================================
+
+// 프롬프트 텍스트 전처리 (불필요한 공백 및 빈 줄 압축)
+function sanitizePromptText(text) {
+    if (!text) return "";
+    return text
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+}
+
+// 지수 백오프(Exponential Backoff) 기반 API 호출
+async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-2.5-flash", maxRetries = 2) {
+    const cleanPrompt = sanitizePromptText(promptText);
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    
+    let delay = 1000; // 1초에서 시작
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: cleanPrompt }] }]
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) return text;
+            }
+
+            // 503(Service Unavailable) / 429(Rate Limit) / 500(Internal Error) 시 백오프 대기 후 재시도
+            if ([503, 429, 500].includes(response.status) && attempt < maxRetries) {
+                console.warn(`[${modelName}] HTTP ${response.status} 발생. ${delay}ms 대기 후 재시도 (${attempt}/${maxRetries})...`);
+                await new Promise(res => setTimeout(res, delay));
+                delay *= 2; // 지수 백오프 (1s -> 2s)
+                continue;
+            }
+
+            console.warn(`[${modelName}] API 응답 실패 (Status: ${response.status})`);
+            break;
+        } catch (e) {
+            console.warn(`[${modelName}] 네트워크 에러 발생 (${attempt}/${maxRetries}):`, e);
+            if (attempt < maxRetries) {
+                await new Promise(res => setTimeout(res, delay));
+                delay *= 2;
+            }
+        }
+    }
+    return null;
+}
+
+// 안전한 Gemini API 통합 호출 (주 모델 gemini-2.5-flash -> 경량 보조 모델 gemini-2.5-flash-lite 순차 시도)
+async function callGeminiSafe(promptText, apiKey) {
+    if (!apiKey) return null;
+    
+    // 1차 시도: gemini-2.5-flash
+    let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.5-flash", 2);
+    
+    // 2차 시도 (Fallback): gemini-2.5-flash-lite
+    if (!result) {
+        console.warn("메인 모델(gemini-2.5-flash) 호출 실패 -> 경량 Fallback 모델(gemini-2.5-flash-lite)로 전환 중...");
+        result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.5-flash-lite", 2);
+    }
+    
+    return result;
+}
+
 async function processTodayFortuneAI() {
     const name = document.getElementById('todayName').value.trim() || "익명참가자";
     const gender = document.getElementById('todayGender').value;
@@ -397,23 +467,7 @@ async function processTodayFortuneAI() {
     let resultText = "";
 
     if (apiKey) {
-        try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } else {
-                console.warn("API 미응답 -> 정통 사주 엔진으로 자동 전환");
-            }
-        } catch (e) {
-            console.warn("AI 오늘의 운세 호출 실패:", e);
-        }
+        resultText = await callGeminiSafe(getTodayPrompt(userState), apiKey);
     }
 
     if (!resultText) {
@@ -468,37 +522,14 @@ async function processMatchAI() {
     let todayText = "";
 
     if (apiKey) {
-        try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+        // 1. 첫 번째 요청 (연애운)
+        loveText = await callGeminiSafe(getLovePrompt(userState), apiKey);
 
-            // 1. 첫 번째 요청 (연애운)
-            const respLove = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: getLovePrompt(userState) }] }] })
-            });
+        // 순간 동시 요청 과부하 방지를 위한 1초 대기
+        await new Promise(res => setTimeout(res, 1000));
 
-            // 무료 티어 순간 동시 요청 거부(503) 방지를 위한 1초 대기
-            await new Promise(res => setTimeout(res, 1000));
-
-            // 2. 두 번째 요청 (오늘의 운세)
-            const respToday = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
-            });
-
-            if (respLove.ok) {
-                const dataLove = await respLove.json();
-                loveText = dataLove.candidates?.[0]?.content?.parts?.[0]?.text;
-            }
-            if (respToday.ok) {
-                const dataToday = await respToday.json();
-                todayText = dataToday.candidates?.[0]?.content?.parts?.[0]?.text;
-            }
-        } catch (e) {
-            console.warn("AI API 연동 오류 -> 정통 사주 엔진으로 자동 전환:", e);
-        }
+        // 2. 두 번째 요청 (오늘의 운세)
+        todayText = await callGeminiSafe(getTodayPrompt(userState), apiKey);
     }
 
     if (!loveText) {
