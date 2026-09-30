@@ -1442,7 +1442,7 @@
     }
 
     // ==========================================
-    // 4. AI 및 폼 제출 처리 (최신 Gemini 2.5 API 반영)
+    // 4. AI 및 폼 제출 처리 (최신 Gemini 3.8 API 반영)
     // ==========================================
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -1481,8 +1481,8 @@
 
         if (apiKey) {
             try {
-                // 최신 gemini-2.5-flash 모델 사용
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                // 최신 gemini-3.8-flash 모델 사용
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1554,8 +1554,8 @@
 
         if (apiKey) {
             try {
-                // 최신 gemini-2.5-flash 모델 사용
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                // 최신 gemini-3.8-flash 모델 사용
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
 
                 const [respLove, respToday] = await Promise.all([
                     fetch(endpoint, {
