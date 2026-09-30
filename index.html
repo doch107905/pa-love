@@ -27,16 +27,19 @@
             background-image: radial-gradient(#dcd5c9 1px, transparent 1px);
             background-size: 20px 20px;
         }
+
+        /* 기본 모바일 기반 컨테이너 */
         .container {
             width: 100%;
             max-width: 480px;
             background: #fcf9f2;
-            padding: 30px 18px;
+            padding: 28px 18px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(44, 34, 30, 0.12);
             border: 2px solid #5a3e36;
             text-align: center;
             position: relative;
+            transition: all 0.3s ease;
         }
         h1 {
             color: #5a3e36;
@@ -70,6 +73,7 @@
             font-size: 13px;
         }
         
+        /* 모바일 자동 확대 방지 (font-size: 16px) & 터치 영역 최적화 */
         input, select, textarea {
             width: 100%;
             padding: 12px 10px;
@@ -81,6 +85,7 @@
             text-align: center;
             -webkit-appearance: none;
             appearance: none;
+            transition: border-color 0.2s;
         }
         select {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%205a3e36' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -100,7 +105,7 @@
             font-family: 'Gowun Batang', serif;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
             margin-top: 10px;
             letter-spacing: 0.5px;
             min-height: 48px;
@@ -121,6 +126,7 @@
             background-color: #6e534a;
         }
 
+        /* 반반 버튼 그룹 */
         .btn-group-half {
             display: flex;
             gap: 8px;
@@ -169,6 +175,7 @@
             border: 1.5px solid rgba(255, 255, 255, 0.4);
             box-shadow: inset 0 0 25px rgba(0,0,0,0.85), 0 0 20px rgba(255, 255, 255, 0.15);
             overflow: hidden;
+            transition: transform 0.3s ease;
         }
         .pentagon-svg {
             position: absolute;
@@ -231,6 +238,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* 전통 서식 스타일 */
         .registration-paper {
             background: #f7f2e8;
             border: 2px double #8c6d62;
@@ -245,6 +253,11 @@
             color: #8c6d62;
             margin-bottom: 16px;
             word-break: keep-all;
+        }
+
+        /* 기본 모바일 1열 폼 구조 */
+        .trad-form-grid {
+            display: block;
         }
         .trad-form-row {
             display: flex;
@@ -382,6 +395,102 @@
             margin-bottom: 12px;
         }
 
+        /* 스크롤바 맞춤 스타일 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0e9dd;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b8a99a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8c6d62;
+        }
+
+        /* 💻 PC / 데스크톱 / 대형 태블릿 반응형 맞춤 스타일 (min-width: 768px) */
+        @media (min-width: 768px) {
+            body {
+                padding: 30px 20px;
+            }
+            .container {
+                max-width: 650px;
+                padding: 42px 35px;
+                border-width: 3px;
+                border-radius: 16px;
+                box-shadow: 0 12px 32px rgba(44, 34, 30, 0.16);
+            }
+            h1 {
+                font-size: 34px;
+                letter-spacing: 2px;
+            }
+            .subtitle {
+                font-size: 15.5px;
+                margin-bottom: 28px;
+            }
+            button {
+                font-size: 16px;
+                padding: 15px 12px;
+                min-height: 52px;
+            }
+            .btn-group-half button {
+                font-size: 14.5px;
+            }
+
+            /* PC용 2열 폼 그리드 배치 */
+            .trad-form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px 14px;
+            }
+            .trad-form-grid .trad-textarea-block {
+                grid-column: span 2;
+            }
+            .registration-paper {
+                padding: 24px 20px;
+            }
+            .trad-label {
+                min-width: 105px;
+                max-width: 115px;
+                font-size: 12.5px;
+            }
+
+            .highlight-box {
+                font-size: 14.5px;
+                padding: 22px 18px;
+            }
+            .info-card {
+                font-size: 14px;
+                padding: 16px 18px;
+            }
+
+            /* PC용 별자리 오각형 스케일 업 */
+            .pentagon-container {
+                width: 340px;
+                height: 318px;
+                margin: 20px auto;
+            }
+            .pentagon-btn {
+                width: 86px;
+                height: 60px;
+                font-size: 14px;
+            }
+            .pentagon-btn span {
+                font-size: 10.5px;
+            }
+
+            /* 위치 비율 보정 */
+            .pentagon-btn[onclick*="목"] { left: 131px; top: 12px; }
+            .pentagon-btn[onclick*="화"] { left: 246px; top: 98px; }
+            .pentagon-btn[onclick*="토"] { left: 202px; top: 233px; }
+            .pentagon-btn[onclick*="금"] { left: 60px; top: 233px; }
+            .pentagon-btn[onclick*="수"] { left: 16px; top: 98px; }
+        }
+
+        /* 📱 초소형 모바일 화면 (380px 이하) 미디어 쿼리 */
         @media (max-width: 380px) {
             .container {
                 padding: 22px 12px;
@@ -417,7 +526,7 @@
         </p>
         <button onclick="showStep('step2')">시작하기 (참가자)</button>
         <button style="background-color: #6e534a; margin-top: 8px;" onclick="goToOfflineTargetSearch('main')">📜 오프라인 궁합 확인하기</button>
-        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️ [운영진] 기존 참가자 매칭권 부여하기</button>
+        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️️ [운영진] 기존 참가자 매칭권 부여하기</button>
         <br>
         <button class="admin-link-btn" onclick="requestAdminCode()">🔒 관리자 데이터 저장소 & API Key 설정</button>
     </div>
@@ -452,62 +561,64 @@
         </div>
     </div>
 
-    <!-- 2-A. 오늘의 운세 입력 폼 -->
+    <!-- 2-A. 오늘의 운세 입력 폼 (PC 2열 그리드 반영) -->
     <div id="step_today_form" class="step">
         <h1>오늘의 운세 신청서</h1>
         <div class="subtitle">기운 분석을 위한 정보들을 입력해주소서</div>
         
         <div class="registration-paper">
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 이름</div>
-                <input type="text" id="todayName" class="trad-input" placeholder="성함 입력">
-            </div>
+            <div class="trad-form-grid">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 이름</div>
+                    <input type="text" id="todayName" class="trad-input" placeholder="성함 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 성별</div>
-                <select id="todayGender" class="trad-input">
-                    <option value="">성별 선택</option>
-                    <option value="남">남성</option>
-                    <option value="여">여성</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 성별</div>
+                    <select id="todayGender" class="trad-input">
+                        <option value="">성별 선택</option>
+                        <option value="남">남성</option>
+                        <option value="여">여성</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 생년월일</div>
-                <input type="text" id="todayBirthDisplay" class="trad-input" placeholder="YYMMDD" readonly style="background:#f0e9dd;">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 생년월일</div>
+                    <input type="text" id="todayBirthDisplay" class="trad-input" placeholder="YYMMDD" readonly style="background:#f0e9dd;">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 양력 / 음력</div>
-                <select id="todayCalendarType" class="trad-input">
-                    <option value="양력">양력</option>
-                    <option value="음력">음력</option>
-                    <option value="음력(윤달)">음력 (윤달)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 양력 / 음력</div>
+                    <select id="todayCalendarType" class="trad-input">
+                        <option value="양력">양력</option>
+                        <option value="음력">음력</option>
+                        <option value="음력(윤달)">음력 (윤달)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 태어난 시간</div>
-                <select id="todayBirthTime" class="trad-input">
-                    <option value="모름">태어난 시간 모름 (시주 제외)</option>
-                    <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
-                    <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
-                    <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
-                    <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
-                    <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
-                    <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
-                    <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
-                    <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
-                    <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
-                    <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
-                    <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
-                    <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 태어난 시간</div>
+                    <select id="todayBirthTime" class="trad-input">
+                        <option value="모름">태어난 시간 모름 (시주 제외)</option>
+                        <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
+                        <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
+                        <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
+                        <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
+                        <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
+                        <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
+                        <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
+                        <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
+                        <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
+                        <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
+                        <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
+                        <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 출생 지역</div>
-                <input type="text" id="todayBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 출생 지역</div>
+                    <input type="text" id="todayBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                </div>
             </div>
         </div>
 
@@ -538,87 +649,89 @@
         </div>
     </div>
 
-    <!-- 2-B. 인연등록서 작성 폼 -->
+    <!-- 2-B. 인연등록서 작성 폼 (PC 2열 그리드 반영) -->
     <div id="step_match_form" class="step">
         <h1>인연등록서</h1>
         <div class="paper-title-decor">━━━━ 당신의 소중한 인연을 등록해주세요 ━━━━</div>
         
         <div class="registration-paper">
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 이름</div>
-                <input type="text" id="userName" class="trad-input" placeholder="성함 입력">
-            </div>
+            <div class="trad-form-grid">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 이름</div>
+                    <input type="text" id="userName" class="trad-input" placeholder="성함 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 성별</div>
-                <select id="userGender" class="trad-input">
-                    <option value="">성별 선택</option>
-                    <option value="남">남성</option>
-                    <option value="여">여성</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️️ 성별</div>
+                    <select id="userGender" class="trad-input">
+                        <option value="">성별 선택</option>
+                        <option value="남">남성</option>
+                        <option value="여">여성</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️️ 생년월일</div>
-                <input type="text" id="matchBirthDisplay" class="trad-input" placeholder="YYMMDD" readonly style="background:#f0e9dd;">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 생년월일</div>
+                    <input type="text" id="matchBirthDisplay" class="trad-input" placeholder="YYMMDD" readonly style="background:#f0e9dd;">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 양력 / 음력</div>
-                <select id="userCalendarType" class="trad-input">
-                    <option value="양력">양력</option>
-                    <option value="음력">음력</option>
-                    <option value="음력(윤달)">음력 (윤달)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 양력 / 음력</div>
+                    <select id="userCalendarType" class="trad-input">
+                        <option value="양력">양력</option>
+                        <option value="음력">음력</option>
+                        <option value="음력(윤달)">음력 (윤달)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 태어난 시간</div>
-                <select id="userBirthTime" class="trad-input">
-                    <option value="모름">태어난 시간 모름 (시주 제외)</option>
-                    <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
-                    <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
-                    <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
-                    <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
-                    <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
-                    <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
-                    <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
-                    <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
-                    <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
-                    <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
-                    <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
-                    <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 태어난 시간</div>
+                    <select id="userBirthTime" class="trad-input">
+                        <option value="모름">태어난 시간 모름 (시주 제외)</option>
+                        <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
+                        <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
+                        <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
+                        <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
+                        <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
+                        <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
+                        <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
+                        <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
+                        <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
+                        <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
+                        <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
+                        <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 출생 지역</div>
-                <input type="text" id="userBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 출생 지역</div>
+                    <input type="text" id="userBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 나이</div>
-                <input type="number" id="userAge" class="trad-input" placeholder="나이 입력">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 나이</div>
+                    <input type="number" id="userAge" class="trad-input" placeholder="나이 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️️ 학과</div>
-                <input type="text" id="userDept" class="trad-input" placeholder="소속 학과 입력">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 학과</div>
+                    <input type="text" id="userDept" class="trad-input" placeholder="소속 학과 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 인스타 아이디</div>
-                <input type="text" id="userInsta" class="trad-input" placeholder="SNS 계정 입력">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 인스타 아이디</div>
+                    <input type="text" id="userInsta" class="trad-input" placeholder="SNS 계정 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 표현 이모지</div>
-                <input type="text" id="userEmoji" class="trad-input" placeholder="예: 🌸, 🌿, 🔥" maxlength="2">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 표현 이모지</div>
+                    <input type="text" id="userEmoji" class="trad-input" placeholder="예: 🌸, 🌿, 🔥" maxlength="2">
+                </div>
 
-            <div class="trad-textarea-block" style="text-align:left; margin-top:12px;">
-                <div class="trad-label" style="display:inline-block;">🏵️ 하고싶은 말</div>
-                <textarea id="userIntro" class="trad-input" style="width:100%; height:70px; border:1px solid #b8a99a; background:#fff; border-radius:6px; margin-top:6px; padding:8px;" placeholder="상대방에게 전달하고 싶은 한마디나 이상형을 적어주소서."></textarea>
+                <div class="trad-textarea-block" style="text-align:left; margin-top:12px;">
+                    <div class="trad-label" style="display:inline-block;">🏵️ 하고싶은 말</div>
+                    <textarea id="userIntro" class="trad-input" style="width:100%; height:70px; border:1px solid #b8a99a; background:#fff; border-radius:6px; margin-top:6px; padding:8px;" placeholder="상대방에게 전달하고 싶은 한마디나 이상형을 적어주소서."></textarea>
+                </div>
             </div>
         </div>
 
@@ -661,56 +774,58 @@
         <div class="subtitle">대장에 등록된 상대방(대상자)의 정보로 검색해주소서</div>
 
         <div class="registration-paper">
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 이름</div>
-                <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
-            </div>
+            <div class="trad-form-grid">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 이름</div>
+                    <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 성별</div>
-                <select id="offTargetGender" class="trad-input">
-                    <option value="">성별 선택</option>
-                    <option value="남">남성</option>
-                    <option value="여">여성</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 성별</div>
+                    <select id="offTargetGender" class="trad-input">
+                        <option value="">성별 선택</option>
+                        <option value="남">남성</option>
+                        <option value="여">여성</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 생년월일</div>
-                <input type="text" id="offTargetBirth" class="trad-input" maxlength="6" placeholder="YYMMDD (예: 030305)" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 생년월일</div>
+                    <input type="text" id="offTargetBirth" class="trad-input" maxlength="6" placeholder="YYMMDD (예: 030305)" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️️ 양력 / 음력</div>
-                <select id="offTargetCalendarType" class="trad-input">
-                    <option value="양력">양력</option>
-                    <option value="음력">음력</option>
-                    <option value="음력(윤달)">음력 (윤달)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 양력 / 음력</div>
+                    <select id="offTargetCalendarType" class="trad-input">
+                        <option value="양력">양력</option>
+                        <option value="음력">음력</option>
+                        <option value="음력(윤달)">음력 (윤달)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 태어난 시간</div>
-                <select id="offTargetBirthTime" class="trad-input">
-                    <option value="모름">태어난 시간 모름 (시주 제외)</option>
-                    <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
-                    <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
-                    <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
-                    <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
-                    <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
-                    <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
-                    <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
-                    <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
-                    <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
-                    <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
-                    <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
-                    <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 태어난 시간</div>
+                    <select id="offTargetBirthTime" class="trad-input">
+                        <option value="모름">태어난 시간 모름 (시주 제외)</option>
+                        <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
+                        <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
+                        <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
+                        <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
+                        <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
+                        <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
+                        <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
+                        <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
+                        <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
+                        <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
+                        <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
+                        <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 출생 지역</div>
-                <input type="text" id="offTargetBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 출생 지역</div>
+                    <input type="text" id="offTargetBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                </div>
             </div>
         </div>
 
@@ -732,56 +847,58 @@
         <div id="offTargetSummaryBanner" class="info-card" style="border-left:3px solid #b85d38; background:#f0e9dd;"></div>
 
         <div class="registration-paper">
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 이름</div>
-                <input type="text" id="offAppName" class="trad-input" placeholder="본인 성함 입력">
-            </div>
+            <div class="trad-form-grid">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 이름</div>
+                    <input type="text" id="offAppName" class="trad-input" placeholder="본인 성함 입력">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 성별</div>
-                <select id="offAppGender" class="trad-input">
-                    <option value="">성별 선택</option>
-                    <option value="남">남성</option>
-                    <option value="여">여성</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 성별</div>
+                    <select id="offAppGender" class="trad-input">
+                        <option value="">성별 선택</option>
+                        <option value="남">남성</option>
+                        <option value="여">여성</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 생년월일</div>
-                <input type="text" id="offAppBirth" class="trad-input" maxlength="6" placeholder="YYMMDD (예: 030305)" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 생년월일</div>
+                    <input type="text" id="offAppBirth" class="trad-input" maxlength="6" placeholder="YYMMDD (예: 030305)" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 양력 / 음력</div>
-                <select id="offAppCalendarType" class="trad-input">
-                    <option value="양력">양력</option>
-                    <option value="음력">음력</option>
-                    <option value="음력(윤달)">음력 (윤달)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 양력 / 음력</div>
+                    <select id="offAppCalendarType" class="trad-input">
+                        <option value="양력">양력</option>
+                        <option value="음력">음력</option>
+                        <option value="음력(윤달)">음력 (윤달)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 태어난 시간</div>
-                <select id="offAppBirthTime" class="trad-input">
-                    <option value="모름">태어난 시간 모름 (시주 제외)</option>
-                    <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
-                    <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
-                    <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
-                    <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
-                    <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
-                    <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
-                    <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
-                    <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
-                    <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
-                    <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
-                    <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
-                    <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
-                </select>
-            </div>
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 태어난 시간</div>
+                    <select id="offAppBirthTime" class="trad-input">
+                        <option value="모름">태어난 시간 모름 (시주 제외)</option>
+                        <option value="자시(23:30~01:29)">자시 (23:30 ~ 01:29)</option>
+                        <option value="축시(01:30~03:29)">축시 (01:30 ~ 03:29)</option>
+                        <option value="인시(03:30~05:29)">인시 (03:30 ~ 05:29)</option>
+                        <option value="묘시(05:30~07:29)">묘시 (05:30 ~ 07:29)</option>
+                        <option value="진시(07:30~09:29)">진시 (07:30 ~ 09:29)</option>
+                        <option value="사시(09:30~11:29)">사시 (09:30 ~ 11:29)</option>
+                        <option value="오시(11:30~13:29)">오시 (11:30 ~ 13:29)</option>
+                        <option value="미시(13:30~15:29)">미시 (13:30 ~ 15:29)</option>
+                        <option value="신시(15:30~17:29)">신시 (15:30 ~ 17:29)</option>
+                        <option value="유시(17:30~19:29)">유시 (17:30 ~ 19:29)</option>
+                        <option value="술시(19:30~21:29)">술시 (19:30 ~ 21:29)</option>
+                        <option value="해시(21:30~23:29)">해시 (21:30 ~ 23:29)</option>
+                    </select>
+                </div>
 
-            <div class="trad-form-row">
-                <div class="trad-label">🏵️ 출생 지역</div>
-                <input type="text" id="offAppBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                <div class="trad-form-row">
+                    <div class="trad-label">🏵️ 출생 지역</div>
+                    <input type="text" id="offAppBirthRegion" class="trad-input" placeholder="예: 서울, 부산, 대구 등">
+                </div>
             </div>
         </div>
 
@@ -812,7 +929,7 @@
         </div>
     </div>
 
-    <!-- 4. 네 번째 화면 (오행 상생·상극 개편 내용) -->
+    <!-- 4. 네 번째 화면 (오행 상생·상극 안내) -->
     <div id="step4" class="step">
         <h1>오행과 궁합</h1>
         <div class="subtitle">상생과 상극의 이치를 알아보소서</div>
@@ -884,7 +1001,7 @@
         </div>
     </div>
 
-    <!-- 5. 다섯 번째 화면 (하얀색 발광 실선 별자리 천문도 정오각형 오행 상자) -->
+    <!-- 5. 다섯 번째 화면 (하얀 발광 별자리 천문도 정오각형 오행 상자) -->
     <div id="step5" class="step">
         <h1>오행 상자 선택</h1>
         <div class="subtitle">마음에 드는 별자리 오행 상자를 고르소서</div>
@@ -893,7 +1010,6 @@
             <!-- 밤하늘 하얀 별자리(Constellation) SVG -->
             <svg class="pentagon-svg" viewBox="0 0 310 290">
                 <defs>
-                    <!-- 눈부신 백색 발광 필터 (White Glow) -->
                     <filter id="whiteGlow" x="-50%" y="-50%" width="200%" height="200%">
                         <feGaussianBlur stdDeviation="3.5" result="blur" />
                         <feMerge>
@@ -914,10 +1030,10 @@
                 <circle cx="225" cy="180" r="1.2" fill="#ffffff" opacity="0.9"/>
                 <circle cx="155" cy="275" r="1" fill="#ffffff" opacity="0.7"/>
 
-                <!-- 외곽 하얀색 발광 실선 (White Glowing Solid Line) -->
+                <!-- 외곽 하얀색 발광 실선 -->
                 <polygon points="160,38 265,116 225,239 95,239 55,116" fill="none" stroke="#ffffff" stroke-width="2" filter="url(#whiteGlow)" opacity="0.95"/>
                 
-                <!-- 내부 하얀색 발광 실선 (White Glowing Solid Line - 점선 무관) -->
+                <!-- 내부 하얀색 발광 실선 -->
                 <polyline points="160,38 225,239 55,116 265,116 95,239 160,38" fill="none" stroke="#ffffff" stroke-width="1.6" filter="url(#whiteGlow)" opacity="0.9"/>
                 
                 <!-- 하얀색 별자리 성좌 빛나는 노드 별 -->
