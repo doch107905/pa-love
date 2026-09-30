@@ -770,7 +770,7 @@
         <div class="registration-paper">
             <div class="trad-form-grid">
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️ 이름</div>
+                    <div class="trad-label">🏵️️ 이름</div>
                     <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
                 </div>
 
@@ -1190,7 +1190,6 @@
         saveToLocalStorage(sanitizedData);
     }
 
-    // 타임아웃 지원 비동기 저장 (UI 멈춤 방지)
     function saveRegistrationWithTimeout(data, ms = 1200) {
         return new Promise((resolve) => {
             let completed = false;
@@ -1286,7 +1285,7 @@
     }
 
     // ==========================================
-    // 3. 만세력 및 사주명리 엔진 (10개 일간별 동적 엔진)
+    // 3. 만세력 및 사주명리 엔진
     // ==========================================
     function getPureDayPillar(y, m, d) {
         const refUtc = Date.UTC(2000, 0, 1);
@@ -1443,7 +1442,7 @@
     }
 
     // ==========================================
-    // 4. AI 및 폼 제출 처리 (에러 안내 보장)
+    // 4. AI 및 폼 제출 처리 (최신 Gemini 2.5 API 반영)
     // ==========================================
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -1482,6 +1481,7 @@
 
         if (apiKey) {
             try {
+                // 최신 gemini-2.5-flash 모델 사용
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -1545,7 +1545,6 @@
         document.getElementById('matchAiLoading').style.display = 'block';
         document.getElementById('matchAiResultContainer').style.display = 'none';
 
-        // UI 멈춤 없는 안전 저장
         saveRegistrationWithTimeout(userState, 1200);
 
         const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
@@ -1555,7 +1554,8 @@
 
         if (apiKey) {
             try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // 최신 gemini-2.5-flash 모델 사용
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
                 const [respLove, respToday] = await Promise.all([
                     fetch(endpoint, {
@@ -1621,7 +1621,7 @@
     }
 
     // ==========================================
-    // 5. 오행 상자 선택 및 매칭 로직 (지연 없는 쾌속 전환)
+    // 5. 오행 상자 선택 및 매칭 로직
     // ==========================================
     async function openBoxList(boxName) {
         userState.chosenBox = boxName;
@@ -1767,7 +1767,7 @@
     }
 
     // ==========================================
-    // 6. 관리자 기능 및 오프라인 궁합 기능 (경고 멘트 100% 보장)
+    // 6. 관리자 기능 및 오프라인 궁합 기능
     // ==========================================
     async function adminGrantMatchRight() {
         const code = prompt("운영진 인증코드를 입력하소서:");
@@ -2017,7 +2017,7 @@
     }
 
     // ==========================================
-    // 7. 사주 10개 일간별 동적 엔진 (API 미등록/실패 시 100% 개별 운세 보장)
+    // 7. 사주 10개 일간별 동적 엔진
     // ==========================================
     function generateDynamicLoveFortune(name, birth, gender, dayGan, element) {
         const ganMap = {
