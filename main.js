@@ -359,7 +359,7 @@ function getTodayPrompt(u) {
 }
 
 // ==========================================
-// 3. AI 및 폼 제출 처리 (공식 gemini-3.8-flash 반영)
+// 3. AI 및 폼 제출 처리 (순차 호출 + 1초 지연)
 // ==========================================
 async function processTodayFortuneAI() {
     const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -398,7 +398,6 @@ async function processTodayFortuneAI() {
 
     if (apiKey) {
         try {
-            // 구글 공식 Model ID: gemini-3.8-flash
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -470,27 +469,31 @@ async function processMatchAI() {
 
     if (apiKey) {
         try {
-            // 구글 공식 Model ID: gemini-3.8-flash
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
 
-            const [respLove, respToday] = await Promise.all([
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: getLovePrompt(userState) }] }] })
-                }),
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
-                })
-            ]);
+            // 1. 첫 번째 요청 (연애운)
+            const respLove = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: getLovePrompt(userState) }] }] })
+            });
 
-            if (respLove.ok && respToday.ok) {
+            // 무료 티어 순간 동시 요청 거부(503) 방지를 위한 1초 대기
+            await new Promise(res => setTimeout(res, 1000));
+
+            // 2. 두 번째 요청 (오늘의 운세)
+            const respToday = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
+            });
+
+            if (respLove.ok) {
                 const dataLove = await respLove.json();
-                const dataToday = await respToday.json();
-
                 loveText = dataLove.candidates?.[0]?.content?.parts?.[0]?.text;
+            }
+            if (respToday.ok) {
+                const dataToday = await respToday.json();
                 todayText = dataToday.candidates?.[0]?.content?.parts?.[0]?.text;
             }
         } catch (e) {
@@ -684,7 +687,7 @@ function renderMatchResult() {
 }
 
 // ==========================================
-// 5. 관리자 기능 및 오프라인 궁합 기능 (경고 안내 멘트 & 이동 처리 보장)
+// 5. 관리자 기능 및 오프라인 궁합 기능
 // ==========================================
 async function adminGrantMatchRight() {
     const code = prompt("운영진 인증코드를 입력하소서:");
@@ -706,7 +709,6 @@ async function adminGrantMatchRight() {
         if (foundUser) {
             userState = { ...foundUser };
             alert(`[${foundUser.name}] 님의 데이터를 확인했습니다! 오행과 궁합 설명 창으로 이동합니다.`);
-            // 있으면 오행과 궁합 설명(step4)으로 이동
             showStep('step4');
         } else {
             alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
