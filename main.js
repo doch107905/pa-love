@@ -60,7 +60,6 @@ async function fetchAllRegistrations() {
     const activeDb = getFirebaseDb();
     if (activeDb) {
         try {
-            // DB 연결 지연 시 무반응 방지를 위한 2.5초 타임아웃 설정
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error("DB Timeout")), 2500)
             );
@@ -360,7 +359,7 @@ function getTodayPrompt(u) {
 }
 
 // ==========================================
-// 3. AI 및 폼 제출 처리 (Gemini 3 Flash 모델)
+// 3. AI 및 폼 제출 처리 (공식 gemini-3.8-flash 반영)
 // ==========================================
 async function processTodayFortuneAI() {
     const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -399,8 +398,8 @@ async function processTodayFortuneAI() {
 
     if (apiKey) {
         try {
-            // gemini-3-flash 모델 반영
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`;
+            // 구글 공식 Model ID: gemini-3.8-flash
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -471,8 +470,8 @@ async function processMatchAI() {
 
     if (apiKey) {
         try {
-            // gemini-3-flash 모델 반영
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`;
+            // 구글 공식 Model ID: gemini-3.8-flash
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
 
             const [respLove, respToday] = await Promise.all([
                 fetch(endpoint, {
