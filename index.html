@@ -522,7 +522,7 @@
         </p>
         <button onclick="showStep('step2')">시작하기 (참가자)</button>
         <button style="background-color: #6e534a; margin-top: 8px;" onclick="goToOfflineTargetSearch('main')">📜 오프라인 궁합 확인하기</button>
-        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️ [운영진] 기존 참가자 매칭권 부여하기</button>
+        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️️ [운영진] 기존 참가자 매칭권 부여하기</button>
         <br>
         <button class="admin-link-btn" onclick="requestAdminCode()">🔒 관리자 데이터 저장소 & API Key 설정</button>
     </div>
@@ -658,7 +658,7 @@
                 </div>
 
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️️ 성별</div>
+                    <div class="trad-label">🏵 성별</div>
                     <select id="userGender" class="trad-input">
                         <option value="">성별 선택</option>
                         <option value="남">남성</option>
@@ -770,7 +770,7 @@
         <div class="registration-paper">
             <div class="trad-form-grid">
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️️ 이름</div>
+                    <div class="trad-label">🏵️ 이름</div>
                     <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
                 </div>
 
@@ -1442,7 +1442,7 @@
     }
 
     // ==========================================
-    // 4. AI 및 폼 제출 처리 (최신 Gemini 3.8 API 반영)
+    // 4. AI 및 폼 제출 처리 (안전 비동기 및 예외 Silent Fallback)
     // ==========================================
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -1481,8 +1481,8 @@
 
         if (apiKey) {
             try {
-                // 최신 gemini-3.8-flash 모델 사용
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+                // 표준 gemini-1.5-flash 모델 엔드포인트
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1493,12 +1493,10 @@
                     const data = await response.json();
                     resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 } else {
-                    const errData = await response.json().catch(() => ({}));
-                    alert("Gemini API 호출 오류: " + (errData.error?.message || "API Key 상태를 확인해주소서. 정통 사주 운세로 대체합니다."));
+                    console.warn("Gemini API 호출 미응답/과부하 -> 정통 사주 엔진으로 자동 전환");
                 }
             } catch (e) {
-                console.warn("AI 오늘의 운세 호출 실패:", e);
-                alert("Gemini API 통신 실패: 인터넷 연결 상태 또는 API Key를 확인해주소서.");
+                console.warn("AI 오늘의 운세 호출 실패 -> 정통 사주 엔진으로 자동 전환:", e);
             }
         }
 
@@ -1554,8 +1552,8 @@
 
         if (apiKey) {
             try {
-                // 최신 gemini-3.8-flash 모델 사용
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+                // 표준 gemini-1.5-flash 모델 엔드포인트
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
                 const [respLove, respToday] = await Promise.all([
                     fetch(endpoint, {
@@ -1577,12 +1575,10 @@
                     loveText = dataLove.candidates?.[0]?.content?.parts?.[0]?.text;
                     todayText = dataToday.candidates?.[0]?.content?.parts?.[0]?.text;
                 } else {
-                    const errData = await respLove.json().catch(() => ({}));
-                    alert("Gemini API 호출 오류: " + (errData.error?.message || "API Key를 확인해주소서. 사주 명리 정통 분석으로 대체합니다."));
+                    console.warn("API 미응답 -> 정통 사주 엔진으로 자동 전환");
                 }
             } catch (e) {
-                console.warn("AI API 연동 오류 발생:", e);
-                alert("Gemini API 연동 중 네트워크 오류가 발생하여 사주 명리 정통 분석으로 대체합니다.");
+                console.warn("AI API 연동 오류 -> 정통 사주 엔진으로 자동 전환:", e);
             }
         }
 
