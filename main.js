@@ -196,8 +196,11 @@ function goHome() {
 }
 
 function goToOfflineTargetSearch(source) {
-    document.getElementById('offTargetCardArea').style.display = 'none';
-    document.getElementById('offTargetCardArea').innerHTML = '';
+    const cardArea = document.getElementById('offTargetCardArea');
+    if (cardArea) {
+        cardArea.style.display = 'none';
+        cardArea.innerHTML = '';
+    }
     showStep('step_offline_target');
 }
 
@@ -270,7 +273,8 @@ function getSajuDetailFromBirth(inputVal) {
 }
 
 function calculateElement() {
-    const inputVal = document.getElementById('birthInput').value.trim();
+    const birthEl = document.getElementById('birthInput');
+    const inputVal = birthEl ? birthEl.value.trim() : "";
     if (inputVal.length !== 6) {
         alert('생년월일 6자리(YYMMDD)를 정확히 입력해주소서!');
         return;
@@ -301,16 +305,22 @@ function calculateElement() {
     userState.dayZhi = resultInfo.dayZhi;
     userState.element = resultInfo.element;
 
-    document.getElementById('elementResultText').innerHTML = `
-        <b>[ 정통 사주 명리학 감정 결과 ]</b><br><br>
-        생년월일: <b>${fullYear}년 ${mm}월 ${dd}일</b><br>
-        사주 일주 천간: <b>${resultInfo.ganName}</b> (${resultInfo.dayGan}${resultInfo.dayZhi})<br>
-        본원 오행: <b>${resultInfo.element}</b><br><br>
-        ${resultInfo.desc}
-    `;
+    const resEl = document.getElementById('elementResultText');
+    if (resEl) {
+        resEl.innerHTML = `
+            <b>[ 정통 사주 명리학 감정 결과 ]</b><br><br>
+            생년월일: <b>${fullYear}년 ${mm}월 ${dd}일</b><br>
+            사주 일주 천간: <b>${resultInfo.ganName}</b> (${resultInfo.dayGan}${resultInfo.dayZhi})<br>
+            본원 오행: <b>${resultInfo.element}</b><br><br>
+            ${resultInfo.desc}
+        `;
+    }
 
-    document.getElementById('todayBirthDisplay').value = inputVal;
-    document.getElementById('matchBirthDisplay').value = inputVal;
+    const todayBirthEl = document.getElementById('todayBirthDisplay');
+    if (todayBirthEl) todayBirthEl.value = inputVal;
+
+    const matchBirthEl = document.getElementById('matchBirthDisplay');
+    if (matchBirthEl) matchBirthEl.value = inputVal;
 
     showStep('step2_result');
 }
@@ -324,7 +334,7 @@ function getLovePrompt(u) {
 * 성별 : ${u.gender}
 * 출생 지역 : ${u.birthRegion}
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘.  사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘. 
 정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
 
 - 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
@@ -346,7 +356,7 @@ function getTodayPrompt(u) {
 * 성별 : ${u.gender}
 * 출생 지역 : ${u.birthRegion}
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘. 
 정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
 
 - 행운의 컬러와 행운의 숫자를 분석해줘.
@@ -363,7 +373,6 @@ function getTodayPrompt(u) {
 // 3. API 전처리, Exponential Backoff 및 Fallback 구현
 // ==========================================
 
-// 프롬프트 텍스트 전처리 (불필요한 공백 및 빈 줄 압축)
 function sanitizePromptText(text) {
     if (!text) return "";
     return text
@@ -372,12 +381,11 @@ function sanitizePromptText(text) {
         .trim();
 }
 
-// 지수 백오프(Exponential Backoff) 기반 API 호출
 async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-flash-lite-latest", maxRetries = 2) {
     const cleanPrompt = sanitizePromptText(promptText);
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     
-    let delay = 1000; // 1초에서 시작
+    let delay = 1000;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -395,11 +403,10 @@ async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-fl
                 if (text) return text;
             }
 
-            // 503(Service Unavailable) / 429(Rate Limit) / 500(Internal Error) 시 백오프 대기 후 재시도
             if ([503, 429, 500].includes(response.status) && attempt < maxRetries) {
                 console.warn(`[${modelName}] HTTP ${response.status} 발생. ${delay}ms 대기 후 재시도 (${attempt}/${maxRetries})...`);
                 await new Promise(res => setTimeout(res, delay));
-                delay *= 2; // 지수 백오프 (1s -> 2s)
+                delay *= 2;
                 continue;
             }
 
@@ -416,14 +423,11 @@ async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-fl
     return null;
 }
 
-// 안전한 Gemini API 통합 호출 (주 모델 gemini-flash-lite-latest -> 경량 보조 모델 gemini-2.5-flash-lite 순차 시도)
 async function callGeminiSafe(promptText, apiKey) {
     if (!apiKey) return null;
     
-    // 1차 시도: gemini-flash-lite-latest (빠른 처리 속도)
     let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-lite-latest", 2);
     
-    // 2차 시도 (Fallback): gemini-2.5-flash-lite
     if (!result) {
         console.warn("메인 모델(gemini-flash-lite-latest) 호출 실패 -> 경량 Fallback 모델(gemini-2.5-flash-lite)로 전환 중...");
         result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.5-flash-lite", 2);
@@ -433,11 +437,11 @@ async function callGeminiSafe(promptText, apiKey) {
 }
 
 async function processTodayFortuneAI() {
-    const name = document.getElementById('todayName').value.trim() || "익명참가자";
-    const gender = document.getElementById('todayGender').value;
-    const calendarType = document.getElementById('todayCalendarType').value || "양력";
-    const birthTime = document.getElementById('todayBirthTime').value || "모름";
-    const birthRegion = document.getElementById('todayBirthRegion').value.trim() || "미지정";
+    const name = document.getElementById('todayName')?.value?.trim() || "익명참가자";
+    const gender = document.getElementById('todayGender')?.value || "";
+    const calendarType = document.getElementById('todayCalendarType')?.value || "양력";
+    const birthTime = document.getElementById('todayBirthTime')?.value || "모름";
+    const birthRegion = document.getElementById('todayBirthRegion')?.value?.trim() || "미지정";
 
     if (!gender) {
         alert("성별을 선택해주소서!");
@@ -450,7 +454,7 @@ async function processTodayFortuneAI() {
     userState.birthTime = birthTime;
     userState.birthRegion = birthRegion;
 
-    const todayBirthVal = document.getElementById('todayBirthDisplay').value.trim();
+    const todayBirthVal = document.getElementById('todayBirthDisplay')?.value?.trim();
     if (todayBirthVal) userState.birth = todayBirthVal;
 
     if ((!userState.element || !userState.dayGan) && userState.birth) {
@@ -461,8 +465,10 @@ async function processTodayFortuneAI() {
     }
 
     showStep('step_today_result');
-    document.getElementById('todayLoading').style.display = 'block';
-    document.getElementById('todayResultBox').style.display = 'none';
+    const loadingEl = document.getElementById('todayLoading');
+    const boxEl = document.getElementById('todayResultBox');
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (boxEl) boxEl.style.display = 'none';
 
     const apiKey = (localStorage.getItem('gemini_api_key') || envApiKey).trim();
     let resultText = "";
@@ -477,21 +483,23 @@ async function processTodayFortuneAI() {
         resultText = formatMarkdown(resultText);
     }
 
-    document.getElementById('todayLoading').style.display = 'none';
-    document.getElementById('todayResultBox').style.display = 'block';
-    document.getElementById('todayResultBox').innerHTML = `<b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 감정 ]</b><br><br>${resultText}`;
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (boxEl) {
+        boxEl.style.display = 'block';
+        boxEl.innerHTML = `<b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 감정 ]</b><br><br>${resultText}`;
+    }
 }
 
 async function processMatchAI() {
-    userState.name = document.getElementById('userName').value.trim() || "익명참가자";
-    userState.gender = document.getElementById('userGender').value;
+    userState.name = document.getElementById('userName')?.value?.trim() || "익명참가자";
+    userState.gender = document.getElementById('userGender')?.value || "";
 
     if (!userState.gender) {
         alert("성별을 선택해주소서!");
         return;
     }
 
-    const matchBirthVal = document.getElementById('matchBirthDisplay').value.trim();
+    const matchBirthVal = document.getElementById('matchBirthDisplay')?.value?.trim();
     if (matchBirthVal) userState.birth = matchBirthVal;
 
     if ((!userState.element || !userState.dayGan) && userState.birth) {
@@ -501,19 +509,21 @@ async function processMatchAI() {
         userState.dayZhi = sajuDetail.dayZhi;
     }
 
-    userState.calendarType = document.getElementById('userCalendarType').value || "양력";
-    userState.birthTime = document.getElementById('userBirthTime').value || "모름";
-    userState.birthRegion = document.getElementById('userBirthRegion').value.trim() || "미지정";
-    userState.age = document.getElementById('userAge').value.trim() || "-";
-    userState.dept = document.getElementById('userDept').value.trim() || "-";
-    userState.insta = document.getElementById('userInsta').value.trim() || "-";
-    userState.emoji = document.getElementById('userEmoji').value.trim() || "✨";
-    userState.intro = document.getElementById('userIntro').value.trim() || "좋은 인연 만나요!";
+    userState.calendarType = document.getElementById('userCalendarType')?.value || "양력";
+    userState.birthTime = document.getElementById('userBirthTime')?.value || "모름";
+    userState.birthRegion = document.getElementById('userBirthRegion')?.value?.trim() || "미지정";
+    userState.age = document.getElementById('userAge')?.value?.trim() || "-";
+    userState.dept = document.getElementById('userDept')?.value?.trim() || "-";
+    userState.insta = document.getElementById('userInsta')?.value?.trim() || "-";
+    userState.emoji = document.getElementById('userEmoji')?.value?.trim() || "";
+    userState.intro = document.getElementById('userIntro')?.value?.trim() || "좋은 인연 만나요!";
     if (!userState.chosenBox) userState.chosenBox = "미선택";
 
     showStep('step_match_ai');
-    document.getElementById('matchAiLoading').style.display = 'block';
-    document.getElementById('matchAiResultContainer').style.display = 'none';
+    const loadingEl = document.getElementById('matchAiLoading');
+    const containerEl = document.getElementById('matchAiResultContainer');
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (containerEl) containerEl.style.display = 'none';
 
     saveRegistration(userState);
 
@@ -523,13 +533,8 @@ async function processMatchAI() {
     let todayText = "";
 
     if (apiKey) {
-        // 1. 첫 번째 요청 (연애운)
         loveText = await callGeminiSafe(getLovePrompt(userState), apiKey);
-
-        // 순간 동시 요청 과부하 방지를 위한 1초 대기
         await new Promise(res => setTimeout(res, 1000));
-
-        // 2. 두 번째 요청 (오늘의 운세)
         todayText = await callGeminiSafe(getTodayPrompt(userState), apiKey);
     }
 
@@ -545,11 +550,13 @@ async function processMatchAI() {
         todayText = formatMarkdown(todayText);
     }
 
-    document.getElementById('matchAiLoading').style.display = 'none';
-    document.getElementById('matchAiResultContainer').style.display = 'block';
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (containerEl) containerEl.style.display = 'block';
 
-    document.getElementById('aiLoveResult').innerHTML = `<b>[ 💘 2026년 연애운 분석 ]</b><br><br>${loveText}`;
-    document.getElementById('aiTodayResult').innerHTML = `<b>[ 🔮 오늘의 운세 (2026년 10월 1일) ]</b><br><br>${todayText}`;
+    const loveEl = document.getElementById('aiLoveResult');
+    const todayEl = document.getElementById('aiTodayResult');
+    if (loveEl) loveEl.innerHTML = `<b>[ 💘 2026년 연애운 분석 ]</b><br><br>${loveText}`;
+    if (todayEl) todayEl.innerHTML = `<b>[ 🔮 오늘의 운세 (2026년 10월 1일) ]</b><br><br>${todayText}`;
 }
 
 function formatMarkdown(text) {
@@ -558,7 +565,8 @@ function formatMarkdown(text) {
 }
 
 function saveApiKey() {
-    const key = document.getElementById('geminiApiKeyInput').value.trim();
+    const inputEl = document.getElementById('geminiApiKeyInput');
+    const key = inputEl ? inputEl.value.trim() : "";
     if (key) {
         localStorage.setItem('gemini_api_key', key);
         alert("Gemini API Key가 안전하게 저장되었습니다!");
@@ -594,16 +602,21 @@ async function openBoxList(boxName) {
     const actionBtnContainer = document.getElementById('boxListActionButtons');
 
     if (availablePartners.length === 0) {
-        document.getElementById('boxListTitle').innerText = `${boxName} 상자`;
-        container.innerHTML = `
-            <div style="text-align: center; color: #5a3e36; font-weight: bold; padding: 30px 10px; font-size: 15px; line-height: 1.6;">
-                상자에 아직 충분한 인연이 있지 않습니다.
-            </div>
-        `;
-        actionBtnContainer.innerHTML = `
-            <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">📜 데이터 저장하고 초기화면 돌아가기</button>
-            <button style="background-color: #8c6d62; margin-top: 5px;" onclick="showStep('step5')">다른 상자 고르기</button>
-        `;
+        const titleEl = document.getElementById('boxListTitle');
+        if (titleEl) titleEl.innerText = `${boxName} 상자`;
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align: center; color: #5a3e36; font-weight: bold; padding: 30px 10px; font-size: 15px; line-height: 1.6;">
+                    상자에 아직 충분한 인연이 있지 않습니다.
+                </div>
+            `;
+        }
+        if (actionBtnContainer) {
+            actionBtnContainer.innerHTML = `
+                <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">📜 데이터 저장하고 초기화면 돌아가기</button>
+                <button style="background-color: #8c6d62; margin-top: 5px;" onclick="showStep('step5')">다른 상자 고르기</button>
+            `;
+        }
         showStep('step5_list');
     } else {
         const randomIndex = Math.floor(Math.random() * availablePartners.length);
@@ -697,25 +710,31 @@ function renderMatchResult() {
 
     let fullName = p.name || "익명참가자";
 
-    document.getElementById('partnerProfileArea').innerHTML = `
-        <div class="partner-profile-card">
-            <h3>${p.emoji || '✨'} ${fullName} 님의 인연등록서</h3>
-            <b>• 나이:</b> ${p.age}세<br>
-            <b>• 학과:</b> ${p.dept}<br>
-            <b>• 사주 오행:</b> ${p.element || '오행미정'}<br>
-            <b>• 인스타그램:</b> <code>${p.insta}</code><br>
-            <b>• 하고싶은 말:</b> "${p.intro || '잘 부탁드립니다!'}"
-        </div>
-    `;
+    const profileEl = document.getElementById('partnerProfileArea');
+    if (profileEl) {
+        profileEl.innerHTML = `
+            <div class="partner-profile-card">
+                <h3>${p.emoji ? p.emoji + ' ' : ''}${fullName} 님의 인연등록서</h3>
+                <b>• 나이:</b> ${p.age}세<br>
+                <b>• 학과:</b> ${p.dept}<br>
+                <b>• 사주 오행:</b> ${p.element || '오행미정'}<br>
+                <b>• 인스타그램:</b> <code>${p.insta}</code><br>
+                <b>• 하고싶은 말:</b> "${p.intro || '잘 부탁드립니다!'}"
+            </div>
+        `;
+    }
 
     const res = calculateSajuMatchEngine(userState, p);
 
-    document.getElementById('matchResultText').innerHTML = `
-        <b>[ 📜 연분청 사주 궁합 결과지 ]</b><br><br>
-        궁합 진단: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
-        ${res.exp1}<br><br>
-        ${res.exp2}
-    `;
+    const matchEl = document.getElementById('matchResultText');
+    if (matchEl) {
+        matchEl.innerHTML = `
+            <b>[ 📜 연분청 사주 궁합 결과지 ]</b><br><br>
+            궁합 진단: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
+            ${res.exp1}<br><br>
+            ${res.exp2}
+        `;
+    }
 }
 
 // ==========================================
@@ -764,7 +783,8 @@ function requestAdminCode() {
     const code = prompt("관리자 인증코드를 입력하소서:");
     if (code === "7693") {
         const key = localStorage.getItem('gemini_api_key') || envApiKey;
-        document.getElementById('geminiApiKeyInput').value = key;
+        const inputEl = document.getElementById('geminiApiKeyInput');
+        if (inputEl) inputEl.value = key;
         renderAdminData();
         showStep('step7');
     } else if (code !== null) {
@@ -774,6 +794,8 @@ function requestAdminCode() {
 
 async function renderAdminData() {
     const container = document.getElementById('adminDataContainer');
+    if (!container) return;
+
     const registrations = await fetchAllRegistrations();
 
     const categories = ["목(木)", "화(火)", "토(土)", "금(金)", "수(水)"];
@@ -796,7 +818,7 @@ async function renderAdminData() {
                 html += `
                     <div class="data-item">
                         <div>
-                            <b>${p.emoji || ''} ${p.name}</b> ${genderLabel} (${p.age}세, ${p.dept})<br>
+                            <b>${p.emoji ? p.emoji + ' ' : ''}${p.name}</b> ${genderLabel} (${p.age}세, ${p.dept})<br>
                             🕒 ${p.birthTime || '시간모름'} | 📍 ${p.birthRegion || '-'}<br>
                             📱 ${p.insta} | 💬 ${p.intro || '-'}<br>
                             🎁 선택상자: ${p.chosenBox || '미선택'} | 💞 매칭상대: ${matchInfo}
@@ -880,7 +902,7 @@ async function searchOfflineTarget() {
 
         resultArea.innerHTML = `
             <div class="partner-profile-card">
-                <h3>${found.emoji || '🏵️'} ${found.name} 님의 대상자 정보 확인</h3>
+                <h3>${found.emoji ? found.emoji + ' ' : ''}${found.name} 님의 대상자 정보 확인</h3>
                 <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
                 <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
                 <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
@@ -898,12 +920,19 @@ function calculateDirectOfflineCompatibility() {
         return;
     }
 
-    document.getElementById('offAppName').value = userState.name;
-    document.getElementById('offAppGender').value = userState.gender || "남";
-    document.getElementById('offAppBirth').value = userState.birth || "";
-    document.getElementById('offAppCalendarType').value = userState.calendarType || "양력";
-    document.getElementById('offAppBirthTime').value = userState.birthTime || "모름";
-    document.getElementById('offAppBirthRegion').value = userState.birthRegion || "미지정";
+    const nameEl = document.getElementById('offAppName');
+    const genderEl = document.getElementById('offAppGender');
+    const birthEl = document.getElementById('offAppBirth');
+    const calEl = document.getElementById('offAppCalendarType');
+    const timeEl = document.getElementById('offAppBirthTime');
+    const regionEl = document.getElementById('offAppBirthRegion');
+
+    if (nameEl) nameEl.value = userState.name;
+    if (genderEl) genderEl.value = userState.gender || "남";
+    if (birthEl) birthEl.value = userState.birth || "";
+    if (calEl) calEl.value = userState.calendarType || "양력";
+    if (timeEl) timeEl.value = userState.birthTime || "모름";
+    if (regionEl) regionEl.value = userState.birthRegion || "미지정";
 
     calculateOfflineCompatibility();
 }
@@ -914,20 +943,23 @@ function proceedToOfflineApplicant() {
         return;
     }
 
-    document.getElementById('offTargetSummaryBanner').innerHTML = `
-        <b>💞 궁합 매칭 대상자:</b> ${offlineTargetUser.name} 님 (${offlineTargetUser.gender}, ${offlineTargetUser.element})
-    `;
+    const bannerEl = document.getElementById('offTargetSummaryBanner');
+    if (bannerEl) {
+        bannerEl.innerHTML = `
+            <b>💞 궁합 매칭 대상자:</b> ${offlineTargetUser.name} 님 (${offlineTargetUser.gender}, ${offlineTargetUser.element})
+        `;
+    }
 
     showStep('step_offline_applicant');
 }
 
 function calculateOfflineCompatibility() {
-    const appName = document.getElementById('offAppName').value.trim() || userState.name || "신청자";
-    const appGender = document.getElementById('offAppGender').value || userState.gender || "남";
-    const appBirth = document.getElementById('offAppBirth').value.trim() || userState.birth || "";
-    const appCalendarType = document.getElementById('offAppCalendarType').value || userState.calendarType || "양력";
-    const appBirthTime = document.getElementById('offAppBirthTime').value || userState.birthTime || "모름";
-    const appBirthRegion = document.getElementById('offAppBirthRegion').value.trim() || userState.birthRegion || "미지정";
+    const appName = document.getElementById('offAppName')?.value?.trim() || userState.name || "신청자";
+    const appGender = document.getElementById('offAppGender')?.value || userState.gender || "남";
+    const appBirth = document.getElementById('offAppBirth')?.value?.trim() || userState.birth || "";
+    const appCalendarType = document.getElementById('offAppCalendarType')?.value || userState.calendarType || "양력";
+    const appBirthTime = document.getElementById('offAppBirthTime')?.value || userState.birthTime || "모름";
+    const appBirthRegion = document.getElementById('offAppBirthRegion')?.value?.trim() || userState.birthRegion || "미지정";
 
     if (!appGender || !appBirth || appBirth.length !== 6) {
         alert("본인 성별과 생년월일 6자리를 정확히 입력해주소서!");
@@ -946,35 +978,41 @@ function calculateOfflineCompatibility() {
 
     const target = offlineTargetUser;
 
-    document.getElementById('offlineProfilesArea').innerHTML = `
-        <div class="offline-compare-grid">
-            <div class="partner-profile-card" style="margin-bottom:0; font-size:12px;">
-                <h3 style="font-size:14px;">👤 ${applicantUser.name} (본인)</h3>
-                <b>• 오행:</b> ${applicantUser.element}<br>
-                <b>• 성별:</b> ${applicantUser.gender}<br>
-                <b>• 생일:</b> ${applicantUser.birth}<br>
-                <b>• 시간:</b> ${applicantUser.birthTime || '모름'}<br>
-                <b>• 지역:</b> ${applicantUser.birthRegion}
+    const profilesEl = document.getElementById('offlineProfilesArea');
+    if (profilesEl) {
+        profilesEl.innerHTML = `
+            <div class="offline-compare-grid">
+                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px;">
+                    <h3 style="font-size:14px;">👤 ${applicantUser.name} (본인)</h3>
+                    <b>• 오행:</b> ${applicantUser.element}<br>
+                    <b>• 성별:</b> ${applicantUser.gender}<br>
+                    <b>• 생일:</b> ${applicantUser.birth}<br>
+                    <b>• 시간:</b> ${applicantUser.birthTime || '모름'}<br>
+                    <b>• 지역:</b> ${applicantUser.birthRegion}
+                </div>
+                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px; border-color:#b85d38;">
+                    <h3 style="font-size:14px; color:#b85d38;">💖 ${target.name} (상대방)</h3>
+                    <b>• 오행:</b> ${target.element}<br>
+                    <b>• 성별:</b> ${target.gender}<br>
+                    <b>• 생일:</b> ${target.birth}<br>
+                    <b>• 시간:</b> ${target.birthTime || '모름'}<br>
+                    <b>• 지역:</b> ${target.birthRegion}
+                </div>
             </div>
-            <div class="partner-profile-card" style="margin-bottom:0; font-size:12px; border-color:#b85d38;">
-                <h3 style="font-size:14px; color:#b85d38;">💖 ${target.name} (상대방)</h3>
-                <b>• 오행:</b> ${target.element}<br>
-                <b>• 성별:</b> ${target.gender}<br>
-                <b>• 생일:</b> ${target.birth}<br>
-                <b>• 시간:</b> ${target.birthTime || '모름'}<br>
-                <b>• 지역:</b> ${target.birthRegion}
-            </div>
-        </div>
-    `;
+        `;
+    }
 
     const res = calculateSajuMatchEngine(applicantUser, target);
 
-    document.getElementById('offlineMatchResultText').innerHTML = `
-        <b>[ 📜 오프라인 사주 궁합 종합 감정 ]</b><br><br>
-        궁합 진단 점수: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
-        ${res.exp1}<br><br>
-        ${res.exp2}
-    `;
+    const matchEl = document.getElementById('offlineMatchResultText');
+    if (matchEl) {
+        matchEl.innerHTML = `
+            <b>[ 📜 오프라인 사주 궁합 종합 감정 ]</b><br><br>
+            궁합 진단 점수: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
+            ${res.exp1}<br><br>
+            ${res.exp2}
+        `;
+    }
 
     showStep('step_offline_result');
 }
