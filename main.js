@@ -415,7 +415,7 @@ async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-fl
     return null;
 }
 
-// 안전한 Gemini API 통합 호출 (주 모델 gemini-2.0-flash -> 경량 보조 모델 gemini-2.0-flash-lite 순차 시도)
+// 안전한 Gemini API 통합 호출 (주 모델 gemini-flash-latest -> 경량 보조 모델 gemini-flash-lite-latest 순차 시도)
 async function callGeminiSafe(promptText, apiKey) {
     if (!apiKey) return null;
     
@@ -424,7 +424,7 @@ async function callGeminiSafe(promptText, apiKey) {
     
     // 2차 시도 (Fallback): gemini-flash-lite-latest
     if (!result) {
-        console.warn("메인 모델(gemini-2.0-flash) 호출 실패 -> 경량 Fallback 모델(gemini-flash-lite-latest)로 전환 중...");
+        console.warn("메인 모델(gemini-flash-latest) 호출 실패 -> 경량 Fallback 모델(gemini-flash-lite-latest)로 전환 중...");
         result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-lite-latest", 2);
     }
     
