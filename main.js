@@ -372,7 +372,7 @@ function sanitizePromptText(text) {
 }
 
 // 지수 백오프(Exponential Backoff) 기반 API 호출
-async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-2.0-flash", maxRetries = 2) {
+async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-flash-latest", maxRetries = 2) {
     const cleanPrompt = sanitizePromptText(promptText);
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     
@@ -419,13 +419,13 @@ async function fetchGeminiWithBackoff(promptText, apiKey, modelName = "gemini-2.
 async function callGeminiSafe(promptText, apiKey) {
     if (!apiKey) return null;
     
-    // 1차 시도: gemini-2.0-flash
-    let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.0-flash", 2);
+    // 1차 시도: gemini-flash-latest
+    let result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-latest", 2);
     
-    // 2차 시도 (Fallback): gemini-2.0-flash-lite
+    // 2차 시도 (Fallback): gemini-flash-lite-latest
     if (!result) {
-        console.warn("메인 모델(gemini-2.0-flash) 호출 실패 -> 경량 Fallback 모델(gemini-2.0-flash-lite)로 전환 중...");
-        result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-2.0-flash-lite", 2);
+        console.warn("메인 모델(gemini-2.0-flash) 호출 실패 -> 경량 Fallback 모델(gemini-flash-lite-latest)로 전환 중...");
+        result = await fetchGeminiWithBackoff(promptText, apiKey, "gemini-flash-lite-latest", 2);
     }
     
     return result;
