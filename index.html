@@ -334,46 +334,49 @@
         }
         .admin-section {
             text-align: left;
-            max-height: 350px;
+            max-height: 380px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
         .element-category {
             background: #f4efe6;
-            border: 1px solid #dcd5c9;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 10px;
+            border: 1.5px solid #5a3e36;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 14px;
         }
         .element-category h4 {
-            margin: 0 0 6px 0;
+            margin: 0 0 8px 0;
             color: #5a3e36;
-            font-size: 13px;
-            border-bottom: 1px dashed #b8a99a;
-            padding-bottom: 4px;
+            font-size: 14px;
+            border-bottom: 1px dashed #8c6d62;
+            padding-bottom: 6px;
+            font-weight: bold;
         }
         .data-item {
             font-size: 12px;
             background: #fff;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 6px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
             border: 1px solid #e8e1d5;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            line-height: 1.6;
         }
         .delete-btn {
             background-color: #a83232;
             color: white;
             border: none;
-            padding: 4px 8px;
+            padding: 5px 10px;
             font-size: 11px;
             border-radius: 4px;
             cursor: pointer;
             width: auto;
             min-height: auto;
             margin: 0;
+            margin-left: 6px;
         }
         .delete-btn:hover {
             background-color: #7d2323;
@@ -767,7 +770,7 @@
         <div class="registration-paper">
             <div class="trad-form-grid">
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️ 이름</div>
+                    <div class="trad-label">🏵️️ 이름</div>
                     <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
                 </div>
 
@@ -1088,7 +1091,7 @@
     <!-- 7. 관리자 데이터 저장소 및 API Key 설정 페이지 -->
     <div id="step7" class="step">
         <h1>접수된 인연 대장 & 설정</h1>
-        <div class="subtitle">실시간 클라우드 DB 대장 관리 및 Gemini API Key 등록</div>
+        <div class="subtitle">실시간 클라우드 DB 오행별 분류 대장 관리 및 Gemini API Key 등록</div>
         
         <div class="form-group" style="background:#fff; padding:12px; border-radius:6px; border:1px solid #b8a99a;">
             <label>🔑 Gemini API Key 입력</label>
@@ -1131,7 +1134,6 @@
         console.error("Firebase 초기화 에러:", e);
     }
 
-    // LocalStorage 백업 전용
     function saveToLocalStorage(data) {
         try {
             let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
@@ -1147,7 +1149,6 @@
         }
     }
 
-    // 파이어베이스 / LocalStorage 데이터 읽기
     async function fetchAllRegistrations() {
         if (db) {
             try {
@@ -1161,7 +1162,6 @@
         return JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
     }
 
-    // 파이어베이스 / LocalStorage 통합 데이터 저장 (안전성 보장)
     async function saveRegistration(data) {
         const sanitizedData = JSON.parse(JSON.stringify(data));
         if (db) {
@@ -1190,7 +1190,6 @@
         saveToLocalStorage(sanitizedData);
     }
 
-    // 백그라운드 안전 비동기 저장 (네트워크 대기 방지)
     function saveRegistrationWithTimeout(data, ms = 1500) {
         return new Promise((resolve) => {
             let completed = false;
@@ -1399,7 +1398,6 @@
         showStep('step2_result');
     }
 
-    // 프롬프트 텍스트 헬퍼
     function getLovePrompt(u) {
         return `
 * 이름 : ${u.name}
@@ -1409,8 +1407,7 @@
 * 성별 : ${u.gender}
 * 출생 지역 : ${u.birthRegion}
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 손님들이 돈을 내고 보는 만큼 만족감 있게 자세하게 적어줘.
-정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘.
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 손님들이 돈을 내고 보는 만큼 만족감 있게 자세하게 적어줘. 정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘.
 
 - 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
 - 나의 연애 스타일을 분석해줘.
@@ -1445,7 +1442,7 @@
     }
 
     // ==========================================
-    // 4. AI 및 폼 제출 처리 (안전 비동기 보장)
+    // 4. AI 및 폼 제출 처리
     // ==========================================
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -1539,12 +1536,10 @@
         userState.emoji = document.getElementById('userEmoji').value.trim() || "✨";
         userState.intro = document.getElementById('userIntro').value.trim() || "좋은 인연 만나요!";
 
-        // 화면 즉시 전환 (UI 블로킹 방지)
         showStep('step_match_ai');
         document.getElementById('matchAiLoading').style.display = 'block';
         document.getElementById('matchAiResultContainer').style.display = 'none';
 
-        // 데이터 백그라운드 안전 저장 (1.5초 타임아웃)
         saveRegistrationWithTimeout(userState, 1500);
 
         const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
@@ -1581,7 +1576,6 @@
             }
         }
 
-        // 결과 예외 보장 (API 장애 시 정통 사주 엔진 기반 자동 대체)
         if (!loveText) {
             loveText = generateDynamicLoveFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
         } else {
@@ -1626,7 +1620,10 @@
         let availablePartners = registrations.filter(p => {
             const isSelf = (p.insta && userState.insta && p.insta === userState.insta) || (p.name === userState.name && p.birth === userState.birth);
             const matchesBox = p.element === boxName || (p.element && boxName && p.element.includes(boxName.charAt(0)));
-            const isOppositeGender = (userState.gender === '남' && p.gender === '여') || (userState.gender === '여' && p.gender === '남');
+            
+            const userG = (userState.gender || '').charAt(0);
+            const targetG = (p.gender || '').charAt(0);
+            const isOppositeGender = (userG === '남' && targetG === '여') || (userG === '여' && targetG === '남');
 
             return !isSelf && matchesBox && isOppositeGender;
         });
@@ -1642,7 +1639,7 @@
                 </div>
             `;
             actionBtnContainer.innerHTML = `
-                <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">📜 인연 대장에 등록 후 인연 기다리기</button>
+                <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">📜 데이터 저장하고 초기화면 돌아가기</button>
                 <button style="background-color: #8c6d62; margin-top: 5px;" onclick="showStep('step5')">다른 상자 고르기</button>
             `;
             showStep('step5_list');
@@ -1778,7 +1775,7 @@
                 alert(`[${foundUser.name}] 님의 데이터를 확인했습니다! 오행 상자 선택 창으로 이동합니다.`);
                 showStep('step5');
             } else {
-                alert("해당 정보와 일치하는 참가자를 대장에서 찾을 수 없습니다. 인연등록서를 먼저 작성해 주세요.");
+                alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
             }
         } else if (code !== null) {
             alert("인증코드가 틀렸습니다!");
@@ -2003,7 +2000,6 @@
         showStep('step_offline_result');
     }
 
-    // 기본 사주 엔진 기반 동적 시뮬레이션
     function generateDynamicLoveFortune(name, birth, gender, dayGan, element) {
         let gan = dayGan || "甲";
         let elem = element || "목(木)";
