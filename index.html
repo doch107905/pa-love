@@ -522,7 +522,7 @@
         </p>
         <button onclick="showStep('step2')">시작하기 (참가자)</button>
         <button style="background-color: #6e534a; margin-top: 8px;" onclick="goToOfflineTargetSearch('main')">📜 오프라인 궁합 확인하기</button>
-        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️️ [운영진] 기존 참가자 매칭권 부여하기</button>
+        <button style="background-color: #b85d38; margin-top: 8px;" onclick="adminGrantMatchRight()">🛡️ [운영진] 기존 참가자 매칭권 부여하기</button>
         <br>
         <button class="admin-link-btn" onclick="requestAdminCode()">🔒 관리자 데이터 저장소 & API Key 설정</button>
     </div>
@@ -584,7 +584,7 @@
                 </div>
 
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️ 양력 / 음력</div>
+                    <div class="trad-label">🏵️️ 양력 / 음력</div>
                     <select id="todayCalendarType" class="trad-input">
                         <option value="양력">양력</option>
                         <option value="음력">음력</option>
@@ -770,7 +770,7 @@
         <div class="registration-paper">
             <div class="trad-form-grid">
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️ 이름</div>
+                    <div class="trad-label">🏵 이름</div>
                     <input type="text" id="offTargetName" class="trad-input" placeholder="상대방 성함 입력">
                 </div>
 
@@ -1111,7 +1111,7 @@
 
 <script>
     // ==========================================
-    // 1. 파이어베이스 실제 설정 및 초기화
+    // 1. 파이어베이스 싱가포르(아시아) 및 기본 설정 최적화
     // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyDvaUqcZr8t9p3xBZWRk0rTbxjjQz_u-Do",
@@ -1121,17 +1121,25 @@
         messagingSenderId: "1060619460349",
         appId: "1:1060619460349:web:900630f86f8663839f2894",
         measurementId: "G-J8T2WH0BG4",
-        databaseURL: "https://pa-love-doch107905-default-rtdb.firebaseio.com"
+        // 싱가포르/아시아 생성 서버 전용 DB URL 지정
+        databaseURL: "https://pa-love-doch107905-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
 
     let db = null;
-    try {
-        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
+    function getFirebaseDb() {
+        if (!db) {
+            try {
+                if (typeof firebase !== 'undefined') {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    db = firebase.database();
+                }
+            } catch (e) {
+                console.error("Firebase DB 연결 실패:", e);
+            }
         }
-    } catch (e) {
-        console.error("Firebase 초기화 에러:", e);
+        return db;
     }
 
     function saveToLocalStorage(data) {
@@ -1150,11 +1158,24 @@
     }
 
     async function fetchAllRegistrations() {
-        if (db) {
+        const activeDb = getFirebaseDb();
+        if (activeDb) {
             try {
-                const snapshot = await db.ref('registrations').once('value');
-                const val = snapshot.val() || {};
-                return Object.keys(val).map(key => ({ _fbKey: key, ...val[key] }));
+                let snapshot = await activeDb.ref('registrations').once('value');
+                let val = snapshot.val();
+                
+                // 싱가포르 URL 미응답 시 US URL 대체 시도
+                if (!val) {
+                    try {
+                        const altDb = firebase.app().database("https://pa-love-doch107905-default-rtdb.firebaseio.com");
+                        snapshot = await altDb.ref('registrations').once('value');
+                        val = snapshot.val();
+                    } catch(e) {}
+                }
+
+                if (val) {
+                    return Object.keys(val).map(key => ({ _fbKey: key, ...val[key] }));
+                }
             } catch (e) {
                 console.error("Firebase 읽기 실패:", e);
             }
@@ -1162,32 +1183,34 @@
         return JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
     }
 
+    // 직접 저장(Push) 방식으로 클라우드 저장 문제 완벽 해결
     async function saveRegistration(data) {
         const sanitizedData = JSON.parse(JSON.stringify(data));
-        if (db) {
+        
+        // 1. LocalStorage 무조건 즉시 백업
+        saveToLocalStorage(sanitizedData);
+        
+        // 2. 파이어베이스 클라우드로 즉시 직접 전송 (Push)
+        const activeDb = getFirebaseDb();
+        if (activeDb) {
             try {
-                const snapshot = await db.ref('registrations').once('value');
-                const val = snapshot.val() || {};
-                let existingKey = null;
-
-                for (let key in val) {
-                    if ((val[key].insta && sanitizedData.insta && val[key].insta === sanitizedData.insta) || 
-                        (val[key].name === sanitizedData.name && val[key].birth === sanitizedData.birth)) {
-                        existingKey = key;
-                        break;
-                    }
-                }
-
-                if (existingKey) {
-                    await db.ref('registrations/' + existingKey).update(sanitizedData);
-                } else {
-                    await db.ref('registrations').push(sanitizedData);
-                }
+                const newRef = activeDb.ref('registrations').push();
+                sanitizedData._fbKey = newRef.key;
+                await newRef.set(sanitizedData);
+                console.log("Firebase 클라우드 저장 성공:", sanitizedData._fbKey);
             } catch (e) {
-                console.error("Firebase 저장 실패:", e);
+                console.error("Firebase primary 주소 저장 실패, 대체 주소 시도:", e);
+                try {
+                    const altDb = firebase.app().database("https://pa-love-doch107905-default-rtdb.firebaseio.com");
+                    const altRef = altDb.ref('registrations').push();
+                    sanitizedData._fbKey = altRef.key;
+                    await altRef.set(sanitizedData);
+                    console.log("Firebase 대체 주소 저장 성공:", sanitizedData._fbKey);
+                } catch (err) {
+                    console.error("Firebase 대체 주소 저장도 실패:", err);
+                }
             }
         }
-        saveToLocalStorage(sanitizedData);
     }
 
     function saveRegistrationWithTimeout(data, ms = 1200) {
@@ -1481,7 +1504,6 @@
 
         if (apiKey) {
             try {
-                // 표준 gemini-1.5-flash 모델 엔드포인트
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -1543,7 +1565,8 @@
         document.getElementById('matchAiLoading').style.display = 'block';
         document.getElementById('matchAiResultContainer').style.display = 'none';
 
-        saveRegistrationWithTimeout(userState, 1200);
+        // 클라우드 및 로컬로 즉시 인연등록서 저장
+        saveRegistration(userState);
 
         const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
 
@@ -1552,7 +1575,6 @@
 
         if (apiKey) {
             try {
-                // 표준 gemini-1.5-flash 모델 엔드포인트
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
                 const [respLove, respToday] = await Promise.all([
@@ -1664,7 +1686,7 @@
 
     function selectThisPartner(partnerObj) {
         userState.matchedPartner = partnerObj;
-        saveRegistrationWithTimeout(userState, 1000);
+        saveRegistration(userState);
 
         renderMatchResult();
         showStep('step6');
@@ -1858,9 +1880,10 @@
 
     async function deleteData(key) {
         if (confirm("해당 인연 기록을 대장에서 삭제하시겠습니까?")) {
-            if (db && key && key.length > 5) {
+            const activeDb = getFirebaseDb();
+            if (activeDb && key && key.length > 5) {
                 try {
-                    await db.ref('registrations/' + key).remove();
+                    await activeDb.ref('registrations/' + key).remove();
                 } catch (e) {
                     console.error("Firebase 삭제 실패:", e);
                 }
