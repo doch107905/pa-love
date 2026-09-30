@@ -70,7 +70,6 @@
             font-size: 13px;
         }
         
-        /* 모바일 자동 확대 방지 (font-size: 16px) & 터치 영역 개선 */
         input, select, textarea {
             width: 100%;
             padding: 12px 10px;
@@ -121,6 +120,19 @@
         .btn-secondary:hover {
             background-color: #6e534a;
         }
+
+        .btn-group-half {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-group-half button {
+            flex: 1;
+            margin-top: 0;
+            padding: 12px 6px;
+            font-size: 13.5px;
+        }
+
         .highlight-box {
             background: #f4efe6;
             border: 1px dashed #5a3e36;
@@ -136,41 +148,81 @@
         }
         .info-card {
             background: #f4efe6;
-            padding: 12px 14px;
-            border-radius: 6px;
+            padding: 14px;
+            border-radius: 8px;
             margin-bottom: 12px;
             text-align: left;
             font-size: 13px;
             line-height: 1.6;
-            border-left: 3px solid #5a3e36;
+            border-left: 3.5px solid #5a3e36;
             word-break: keep-all;
         }
-        .box-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 16px;
+
+        /* 밤하늘 별자리 천문도 컨테이너 */
+        .pentagon-container {
+            position: relative;
+            width: 310px;
+            height: 290px;
+            margin: 15px auto;
+            background: radial-gradient(ellipse at center, #18224b 0%, #0b1026 70%, #030612 100%);
+            border-radius: 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.85), 0 0 20px rgba(255, 255, 255, 0.15);
+            overflow: hidden;
         }
-        .element-btn {
-            background-color: #fff;
-            border: 1.5px solid #5a3e36;
-            color: #5a3e36;
-            padding: 12px 8px;
-            font-size: 14px;
+        .pentagon-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 하얀 별빛 오행 노드 버튼 */
+        .pentagon-btn {
+            position: absolute;
+            z-index: 2;
+            width: 78px;
+            height: 54px;
+            padding: 4px;
+            font-size: 13px;
             font-weight: bold;
             font-family: 'Gowun Batang', serif;
-            border-radius: 6px;
+            background: radial-gradient(circle at 30% 30%, #1e293b, #090d1a);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.85), inset 0 0 8px rgba(255, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            min-height: 52px;
+            transition: all 0.25s ease;
+            line-height: 1.25;
+            margin-top: 0;
+            min-height: auto;
         }
-        .element-btn:hover, .element-btn.selected {
-            background-color: #5a3e36;
-            color: #fcf9f2;
+        .pentagon-btn span {
+            color: #e2e8f0;
+            font-size: 9.5px;
+            font-weight: normal;
+            margin-top: 2px;
         }
-        .element-btn.full-width {
-            grid-column: span 2;
+        .pentagon-btn:hover, .pentagon-btn:active {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #e2e8f0);
+            color: #0f172a;
+            border-color: #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 40px rgba(255, 255, 255, 0.8);
+            transform: scale(1.12);
         }
+        .pentagon-btn:hover span, .pentagon-btn:active span {
+            color: #334155;
+            font-weight: bold;
+        }
+
         .partner-list-container {
             max-height: 280px;
             overflow-y: auto;
@@ -179,7 +231,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 전통 서식 반응형 스타일 */
         .registration-paper {
             background: #f7f2e8;
             border: 2px double #8c6d62;
@@ -231,7 +282,6 @@
             border-bottom: 2px solid #5a3e36;
         }
 
-        /* 매칭 상대 프로필 카드 */
         .partner-profile-card {
             background: #fff;
             border: 1px solid #8c6d62;
@@ -325,7 +375,6 @@
             font-size: 14px;
         }
 
-        /* 오프라인 궁합 2컬럼 레이아웃 모바일 대응 */
         .offline-compare-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -333,7 +382,6 @@
             margin-bottom: 12px;
         }
 
-        /* 초소형 모바일 화면 (360px 이하) 미디어 쿼리 */
         @media (max-width: 380px) {
             .container {
                 padding: 22px 12px;
@@ -348,6 +396,10 @@
             }
             .offline-compare-grid {
                 grid-template-columns: 1fr;
+            }
+            .pentagon-container {
+                transform: scale(0.92);
+                margin: 5px auto;
             }
         }
     </style>
@@ -379,6 +431,11 @@
             <input type="text" id="birthInput" maxlength="6" placeholder="예: 030305" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
         </div>
         <button onclick="calculateElement()">내 사주 오행 확인하기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 2-1. 기운 확인 완료 & 서비스 선택 -->
@@ -388,6 +445,11 @@
         <p style="font-size:13.5px; color:#5a3e36; font-weight:bold; margin:16px 0 8px 0;">원하시는 서비스를 선택해주소서</p>
         <button onclick="showStep('step_today_form')" style="background-color: #8c6d62;">🔮 오늘의 운세만 보기</button>
         <button onclick="showStep('step_match_form')" style="background-color: #5a3e36; margin-top:8px;">📜 인연등록서 작성하여 인연 찾기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 2-A. 오늘의 운세 입력 폼 -->
@@ -450,7 +512,11 @@
         </div>
 
         <button onclick="processTodayFortuneAI()">오늘의 운세 감정하기</button>
-        <button class="btn-secondary" onclick="showStep('step2_result')" style="margin-top:5px;">뒤로 가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 2-A 결과. 오늘의 운세 결과 화면 -->
@@ -464,8 +530,12 @@
 
         <div id="todayResultBox" class="highlight-box" style="display:none;"></div>
 
-        <button onclick="goToOfflineTargetSearch('today')" style="background-color: #6e534a; margin-top: 8px;">📜 오프라인용 대상자 조회하고 궁합 보기</button>
-        <button onclick="location.reload()" style="background-color: #8c6d62; margin-top: 5px;">처음으로 돌아가기</button>
+        <button onclick="showStep('step_match_form')" style="background-color: #5a3e36; margin-top: 8px;">📜 인연등록서 작성하고 인연 찾기</button>
+        
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 2-B. 인연등록서 작성 폼 -->
@@ -489,7 +559,7 @@
             </div>
 
             <div class="trad-form-row">
-                <div class="trad-label">🏵️ 생년월일</div>
+                <div class="trad-label">🏵️️ 생년월일</div>
                 <input type="text" id="matchBirthDisplay" class="trad-input" placeholder="YYMMDD" readonly style="background:#f0e9dd;">
             </div>
 
@@ -532,7 +602,7 @@
             </div>
 
             <div class="trad-form-row">
-                <div class="trad-label">🏵️ 학과</div>
+                <div class="trad-label">🏵️️ 학과</div>
                 <input type="text" id="userDept" class="trad-input" placeholder="소속 학과 입력">
             </div>
 
@@ -553,7 +623,11 @@
         </div>
 
         <button onclick="processMatchAI()">등록 완료 및 AI 연애운/오늘의 운세 분석하기</button>
-        <button class="btn-secondary" onclick="showStep('step2_result')" style="margin-top:5px;">뒤로 가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 2-B 결과. AI 연애운 & 오늘의 운세 분석 결과 화면 -->
@@ -571,8 +645,13 @@
             <!-- 오늘의 운세 -->
             <div class="highlight-box" id="aiTodayResult"></div>
 
-            <button style="background-color: #5a3e36; margin-top: 15px;" onclick="showStep('step4')">오행 상자 고르러 가기 ➔</button>
+            <button style="background-color: #5a3e36; margin-top: 15px;" onclick="showStep('step4')">📜 오행과 궁합 이치 알아보기 ➔</button>
             <button onclick="goToOfflineTargetSearch('match')" style="background-color: #6e534a; margin-top: 8px;">📜 오프라인용 대상자 조회하고 궁합 보기</button>
+
+            <div class="btn-group-half">
+                <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+                <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+            </div>
         </div>
     </div>
 
@@ -602,7 +681,7 @@
             </div>
 
             <div class="trad-form-row">
-                <div class="trad-label">🏵️ 양력 / 음력</div>
+                <div class="trad-label">🏵️️ 양력 / 음력</div>
                 <select id="offTargetCalendarType" class="trad-input">
                     <option value="양력">양력</option>
                     <option value="음력">음력</option>
@@ -639,7 +718,10 @@
 
         <div id="offTargetCardArea" style="display:none; margin-top:15px;"></div>
 
-        <button class="btn-secondary" onclick="showStep('step1')" style="margin-top:10px;">처음으로 돌아가기</button>
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 오프라인 궁합 STEP 2: 본인(참가자) 정보 입력 -->
@@ -704,7 +786,11 @@
         </div>
 
         <button onclick="calculateOfflineCompatibility()">둘의 오프라인 궁합 진단하기 ➔</button>
-        <button class="btn-secondary" onclick="showStep('step_offline_target')" style="margin-top:5px;">대상자 다시 조회하기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 오프라인 궁합 STEP 3: 오프라인 궁합 결과지 -->
@@ -712,53 +798,168 @@
         <h1>📜 오프라인 운명 궁합 결과지</h1>
         <div class="subtitle">사주명리학으로 풀어낸 두 사람의 만남과 기운이옵니다</div>
 
-        <!-- 두 사람 프로필 (모바일 반응형 그리드 적용) -->
+        <!-- 두 사람 프로필 -->
         <div id="offlineProfilesArea"></div>
 
         <!-- 상세 궁합 해설 -->
         <div class="highlight-box" id="offlineMatchResultText"></div>
 
         <button onclick="showStep('step_offline_target')" style="margin-top: 15px;">다른 인연 조회하기</button>
-        <button class="btn-secondary" onclick="location.reload()" style="margin-top: 5px;">처음으로 돌아가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
-    <!-- 4. 네 번째 화면 (오행 상생·상극 안내) -->
+    <!-- 4. 네 번째 화면 (오행 상생·상극 개편 내용) -->
     <div id="step4" class="step">
         <h1>오행과 궁합</h1>
         <div class="subtitle">상생과 상극의 이치를 알아보소서</div>
         
-        <div class="info-card">
-            <b>1) 오행별 연애 성향</b><br>
-            🌲 <b>목(木)</b>: 뻗어나가는 성질처럼 직진형! 새로운 시작을 사랑하는 스타일.<br>
-            🔥 <b>화(火)</b>: 타오르는 불꽃처럼 화끈하고 다정다감함. 표현이 솔직한 스타일.<br>
-            ⛰️ <b>토(土)</b>: 너른 대지처럼 포용력 있고 안정적임. 곁을 지켜주는 스타일.<br>
-            ⚔️ <b>금(金)</b>: 단단한 바위처럼 의리가 넘치고 결단력이 확실함. 깔끔한 관계를 지향하는 스타일.<br>
-            💧 <b>수(水)</b>: 깊은 물처럼 지혜롭고 섬세함. 상대 마음을 헤아리는 스타일.
+        <!-- 1. 오행별 본질과 연애 성향 -->
+        <div class="info-card" style="line-height: 1.8;">
+            <b style="font-size: 15px; color: #5a3e36;">📜 1. 오행별 본질과 연애 성향</b><br>
+            <p style="margin: 8px 0 12px 0; font-size: 12.5px; color: #6c584c; line-height: 1.6;">
+                사주명리학에서 오행은 우주를 구성하는 다섯 가지 기운이자 인간의 성품과 기질을 이루는 근원입니다. 각 기운은 고유의 방향성을 지니고 있습니다.
+            </p>
+            
+            <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5; margin-bottom: 8px;">
+                🌲 <b>목(木 - 나무의 기운)</b><br>
+                <span style="font-size: 12.5px; color: #4a3b32;">위로 뻗어나가고 퍼져나가는 성질을 지닙니다. 호기심이 많고 새로운 시작이나 도전을 두려워하지 않는 직진형 연애 스타일입니다.</span>
+            </div>
+
+            <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5; margin-bottom: 8px;">
+                🔥 <b>화(火 - 불의 기운)</b><br>
+                <span style="font-size: 12.5px; color: #4a3b32;">만물을 밝히고 위로 타오르는 기운입니다. 감정에 솔직하고 표현이 뜨거우며, 상대방에게 다정다감하게 다가가는 화끈하고 열정적인 스타일입니다.</span>
+            </div>
+
+            <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5; margin-bottom: 8px;">
+                ⛰️ <b>토(土 - 땅의 기운)</b><br>
+                <span style="font-size: 12.5px; color: #4a3b32;">모든 것을 품어 안는 대지의 안정성을 상징합니다. 중심을 잡고 무게감 있게 상대방의 곁을 든든히 지켜주는 포용력 있는 스타일입니다.</span>
+            </div>
+
+            <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5; margin-bottom: 8px;">
+                ⚔️ <b>금(金 - 쇠·바위의 기운)</b><br>
+                <span style="font-size: 12.5px; color: #4a3b32;">단단하고 결단력 있는 바위의 속성을 지닙니다. 의리가 두텁고 관계의 선이 확실하며, 지저분한 것 없이 깔끔하고 명확한 교제를 지향하는 원칙주의적 스타일입니다.</span>
+            </div>
+
+            <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5;">
+                💧 <b>수(水 - 물의 기운)</b><br>
+                <span style="font-size: 12.5px; color: #4a3b32;">깊은 곳에서 흐르며 만물을 적셔주는 지혜를 상징합니다. 생각이 깊고 섬세하여 말 한마디에도 상대의 마음을 헤아리고 보듬어주는 배려 깊은 스타일입니다.</span>
+            </div>
         </div>
 
-        <div class="info-card">
-            <b>2) 상생 & 상극 관계</b><br>
-            🟢 <b>상생 (서로를 도우며 시너지를 내는 길연)</b><br>목→화 / 화→토 / 토→금 / 금→수 / 수→목<br>
-            🔴 <b>상극 (강하게 자극하고 당기는 묘연)</b><br>목↔토 / 토↔수 / 수↔화 / 화↔금 / 금↔목
+        <!-- 2. 상생과 상극의 관계적 의미 -->
+        <div class="info-card" style="line-height: 1.8; margin-top: 15px;">
+            <b style="font-size: 15px; color: #5a3e36;">☯️ 2. 상생(相生)과 상극(相剋)의 관계적 의미</b><br>
+            <p style="margin: 8px 0 12px 0; font-size: 12.5px; color: #6c584c; line-height: 1.6;">
+                오행의 관계는 서로를 살리는 상생과 서로를 통제하고 자극하는 상극의 흐름으로 이루어져 있습니다.
+            </p>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #c8d6cb; border-left: 3.5px solid #2e7d32; margin-bottom: 10px;">
+                <b style="color: #2e7d32; font-size: 13.5px;">🟢 ① 상생 (相生) : 서로를 도우며 시너지를 내는 길연</b>
+                <div style="font-size: 12px; margin-top: 6px; color: #3d2c25;">
+                    <b>• 원리:</b> 나무는 불을 지피고(목생화), 불은 타서 흙(재)이 되며(화생토), 흙은 단단한 광물(금)을 품고(토생금), 금은 차가운 물을 맺히게 하며(금생수), 물은 다시 나무를 키워냅니다(수생목).<br>
+                    <b>• 흐름:</b> <span style="color:#2e7d32; font-weight:bold;">목 ➔ 화 ➔ 토 ➔ 금 ➔ 수 ➔ 목</span><br>
+                    <b>• 의미:</b> 서로가 서로에게 영감을 주고 부족한 부분을 채워주며 자연스럽게 에너지를 북돋워 주는 조화롭고 편안한 인연입니다.
+                </div>
+            </div>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #f2c8c8; border-left: 3.5px solid #c62828;">
+                <b style="color: #c62828; font-size: 13.5px;">🔴 ② 상극 (相剋) : 강하게 자극하고 당기는 묘연</b>
+                <div style="font-size: 12px; margin-top: 6px; color: #3d2c25;">
+                    <b>• 원리:</b> 나무는 땅의 기운을 뿌리로 누르고(목극토), 흙은 물을 막아 가두며(토극수), 물은 불을 끄고(수극화), 불은 쇠를 녹이며(화극금), 쇠(도구)는 나무를 베어냅니다(금극목).<br>
+                    <b>• 흐름:</b> <span style="color:#c62828; font-weight:bold;">목 ⟷ 토 ➔ 수 ➔ 화 ➔ 금 ➔ 목</span><br>
+                    <b>• 의미:</b> '극(剋)'한다고 해서 무조건 나쁜 것이 아니라, 서로가 서로를 긴장시키고 때로는 강렬하게 끌어당기며 변화를 이끌어내는 자극제가 되는 관계입니다. 예측 불가능한 매력과 애증이 교차하는 역동적인 궁합을 뜻합니다.
+                </div>
+            </div>
         </div>
 
-        <button onclick="showStep('step5')">오행 상자 고르러 가기</button>
+        <button onclick="showStep('step5')">오행 상자 고르러 가기 ➔</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
-    <!-- 5. 다섯 번째 화면 (오행 카테고리 선택) -->
+    <!-- 5. 다섯 번째 화면 (하얀색 발광 실선 별자리 천문도 정오각형 오행 상자) -->
     <div id="step5" class="step">
         <h1>오행 상자 선택</h1>
-        <div class="subtitle">마음에 드는 오행 상자를 고르소서</div>
+        <div class="subtitle">마음에 드는 별자리 오행 상자를 고르소서</div>
         
-        <div class="box-grid">
-            <button class="element-btn" onclick="openBoxList('목(木)')">목(木) 상자<br><span style="font-size:10px; font-weight:normal;">직진과 성장</span></button>
-            <button class="element-btn" onclick="openBoxList('화(火)')">화(火) 상자<br><span style="font-size:10px; font-weight:normal;">솔직한 열정</span></button>
-            <button class="element-btn" onclick="openBoxList('토(土)')">토(土) 상자<br><span style="font-size:10px; font-weight:normal;">편안한 안정</span></button>
-            <button class="element-btn" onclick="openBoxList('금(金)')">금(金) 상자<br><span style="font-size:10px; font-weight:normal;">의리와 결단</span></button>
-            <button class="element-btn full-width" onclick="openBoxList('수(水)')">수(水) 상자 (지혜롭고 섬세한 감성 연애)</button>
+        <div class="pentagon-container">
+            <!-- 밤하늘 하얀 별자리(Constellation) SVG -->
+            <svg class="pentagon-svg" viewBox="0 0 310 290">
+                <defs>
+                    <!-- 눈부신 백색 발광 필터 (White Glow) -->
+                    <filter id="whiteGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3.5" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- 은하수 배경 별빛 흩뿌림 -->
+                <circle cx="25" cy="35" r="1" fill="#ffffff" opacity="0.9"/>
+                <circle cx="285" cy="25" r="1.5" fill="#ffffff" opacity="0.9"/>
+                <circle cx="45" cy="265" r="1.2" fill="#ffffff" opacity="0.8"/>
+                <circle cx="275" cy="255" r="1" fill="#ffffff" opacity="0.9"/>
+                <circle cx="155" cy="145" r="1.5" fill="#ffffff" opacity="0.8"/>
+                <circle cx="85" cy="180" r="1" fill="#ffffff" opacity="0.8"/>
+                <circle cx="225" cy="180" r="1.2" fill="#ffffff" opacity="0.9"/>
+                <circle cx="155" cy="275" r="1" fill="#ffffff" opacity="0.7"/>
+
+                <!-- 외곽 하얀색 발광 실선 (White Glowing Solid Line) -->
+                <polygon points="160,38 265,116 225,239 95,239 55,116" fill="none" stroke="#ffffff" stroke-width="2" filter="url(#whiteGlow)" opacity="0.95"/>
+                
+                <!-- 내부 하얀색 발광 실선 (White Glowing Solid Line - 점선 무관) -->
+                <polyline points="160,38 225,239 55,116 265,116 95,239 160,38" fill="none" stroke="#ffffff" stroke-width="1.6" filter="url(#whiteGlow)" opacity="0.9"/>
+                
+                <!-- 하얀색 별자리 성좌 빛나는 노드 별 -->
+                <circle cx="160" cy="38" r="5.5" fill="#ffffff" filter="url(#whiteGlow)"/>
+                <circle cx="265" cy="116" r="5.5" fill="#ffffff" filter="url(#whiteGlow)"/>
+                <circle cx="225" cy="239" r="5.5" fill="#ffffff" filter="url(#whiteGlow)"/>
+                <circle cx="95" cy="239" r="5.5" fill="#ffffff" filter="url(#whiteGlow)"/>
+                <circle cx="55" cy="116" r="5.5" fill="#ffffff" filter="url(#whiteGlow)"/>
+            </svg>
+
+            <!-- 1. 목(木) 상자 (상단) -->
+            <button class="pentagon-btn" style="left: 121px; top: 11px;" onclick="openBoxList('목(木)')">
+                목(木)<span>직진·성장</span>
+            </button>
+
+            <!-- 2. 화(火) 상자 (우측 상단) -->
+            <button class="pentagon-btn" style="left: 226px; top: 89px;" onclick="openBoxList('화(火)')">
+                화(火)<span>솔직·열정</span>
+            </button>
+
+            <!-- 3. 토(土) 상자 (우측 하단) -->
+            <button class="pentagon-btn" style="left: 186px; top: 212px;" onclick="openBoxList('토(土)')">
+                토(土)<span>포용·안정</span>
+            </button>
+
+            <!-- 4. 금(金) 상자 (좌측 하단) -->
+            <button class="pentagon-btn" style="left: 56px; top: 212px;" onclick="openBoxList('금(金)')">
+                금(金)<span>의리·결단</span>
+            </button>
+
+            <!-- 5. 수(水) 상자 (좌측 상단) -->
+            <button class="pentagon-btn" style="left: 16px; top: 89px;" onclick="openBoxList('수(水)')">
+                수(水)<span>지혜·감성</span>
+            </button>
         </div>
 
-        <button style="background-color: #8c6d62; margin-top: 20px;" onclick="showStep('step4')">📜 오행과 궁합 설명으로 돌아가기</button>
+        <button style="background-color: #8c6d62; margin-top: 15px;" onclick="showStep('step4')">📜 오행과 궁합 설명으로 돌아가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
     <!-- 5-1. 선택한 상자 안내 / 매칭 불가 화면 -->
@@ -768,6 +969,11 @@
         <div id="partnerListContainer" class="partner-list-container"></div>
         <div id="boxListActionButtons">
             <button style="background-color: #8c6d62; margin-top: 15px;" onclick="showStep('step5')">다른 상자 고르기</button>
+        </div>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
         </div>
     </div>
 
@@ -786,7 +992,11 @@
         </p>
 
         <button onclick="goToBoxSelection()">인연이 마음에 안 드신다면? (다른 상자 고르기)</button>
-        <button onclick="location.reload()" style="background-color: #8c6d62; margin-top: 5px;">처음으로 돌아가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
         <br>
         <button class="admin-link-btn" onclick="requestAdminCode()">🔒 관리자 데이터 저장소</button>
     </div>
@@ -803,7 +1013,11 @@
         </div>
 
         <div class="admin-section" id="adminDataContainer"></div>
-        <button onclick="location.reload()" style="margin-top: 15px;">처음으로 돌아가기</button>
+
+        <div class="btn-group-half">
+            <button class="btn-secondary" onclick="goBack()">이전으로 돌아가기</button>
+            <button class="btn-secondary" onclick="goHome()">처음으로 돌아가기</button>
+        </div>
     </div>
 
 </div>
@@ -812,6 +1026,7 @@
     let userState = {
         birth: "",
         dayGan: "",
+        dayZhi: "",
         element: "",
         name: "",
         gender: "",
@@ -828,10 +1043,17 @@
         matchScore: 0
     };
 
-    let offlineTargetUser = null; // 오프라인 궁합 대상자 객체
+    let offlineTargetUser = null; 
+    let stepHistory = [];
 
     // 화면 전환 함수
-    function showStep(stepId) {
+    function showStep(stepId, isBack = false) {
+        const activeEl = document.querySelector('.step.active');
+        
+        if (!isBack && activeEl && activeEl.id !== stepId) {
+            stepHistory.push(activeEl.id);
+        }
+
         document.querySelectorAll('.step').forEach(el => {
             el.classList.remove('active');
         });
@@ -845,50 +1067,68 @@
         }
     }
 
-    // 오프라인 대상자 조회 화면으로 이동
+    function goBack() {
+        if (stepHistory.length > 0) {
+            const prevStep = stepHistory.pop();
+            showStep(prevStep, true);
+        } else {
+            showStep('step1', true);
+        }
+    }
+
+    function goHome() {
+        stepHistory = [];
+        showStep('step1', true);
+    }
+
     function goToOfflineTargetSearch(source) {
         document.getElementById('offTargetCardArea').style.display = 'none';
         document.getElementById('offTargetCardArea').innerHTML = '';
         showStep('step_offline_target');
     }
 
-    // 순수 JS 기반 만세력 일간(Day Gan) 계산 함수
-    function getPureDayGan(y, m, d) {
-        const refUtc = Date.UTC(2000, 0, 1); // 2000년 1월 1일 = 戊午(무오)일 -> 戊(index 4)
+    // 순수 JS 기반 만세력 일간/일지 계산 함수
+    function getPureDayPillar(y, m, d) {
+        const refUtc = Date.UTC(2000, 0, 1);
         const targetUtc = Date.UTC(y, m - 1, d);
         const diffDays = Math.round((targetUtc - refUtc) / 86400000);
+        
         let ganIdx = (4 + diffDays) % 10;
         if (ganIdx < 0) ganIdx = (ganIdx % 10 + 10) % 10;
         
+        let zhiIdx = (6 + diffDays) % 12;
+        if (zhiIdx < 0) zhiIdx = (zhiIdx % 12 + 12) % 12;
+
         const gans = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-        return gans[ganIdx];
+        const zhis = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        return { dayGan: gans[ganIdx], dayZhi: zhis[zhiIdx] };
     }
 
-    // 생년월일 6자리로 일간 및 오행 정보 구하기
-    function getSajuElementFromBirth(inputVal) {
-        if (!inputVal || inputVal.length !== 6) return { element: "목(木)", ganName: "목(木)", desc: "기본 기운입니다." };
+    function getSajuDetailFromBirth(inputVal) {
+        if (!inputVal || inputVal.length !== 6) return { element: "목(木)", ganName: "갑목(甲木)", dayGan: "甲", dayZhi: "寅", desc: "기본 기운입니다." };
 
         let yy = parseInt(inputVal.substring(0, 2), 10);
         let mm = parseInt(inputVal.substring(2, 4), 10);
         let dd = parseInt(inputVal.substring(4, 6), 10);
 
-        if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return { element: "목(木)", ganName: "목(木)", desc: "기본 기운입니다." };
+        if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return { element: "목(木)", ganName: "갑목(甲木)", dayGan: "甲", dayZhi: "寅", desc: "기본 기운입니다." };
 
         let fullYear = (yy <= 35) ? (2000 + yy) : (1900 + yy);
-        let dayGan = "";
+        let pillar = { dayGan: "甲", dayZhi: "寅" };
 
         try {
             if (typeof Solar !== "undefined" && typeof Solar.fromYmdHms === "function") {
                 const solar = Solar.fromYmdHms(fullYear, mm, dd, 12, 0, 0);
-                dayGan = solar.getLunar().getEightChar().getDayGan();
+                const eightChar = solar.getLunar().getEightChar();
+                pillar.dayGan = eightChar.getDayGan();
+                pillar.dayZhi = eightChar.getDayZhi();
             } else {
-                dayGan = getPureDayGan(fullYear, mm, dd);
+                pillar = getPureDayPillar(fullYear, mm, dd);
             }
         } catch (e) {
-            dayGan = getPureDayGan(fullYear, mm, dd);
+            pillar = getPureDayPillar(fullYear, mm, dd);
         }
-
-        if (!dayGan) dayGan = getPureDayGan(fullYear, mm, dd);
 
         const ganOhaengMap = {
             '甲': { element: '목(木)', ganName: '갑목(甲木)', desc: '큰 나무처럼 곧고 당당하며 강한 주관을 가진 甲木(갑목)의 기운입니다.' },
@@ -903,10 +1143,20 @@
             '癸': { element: '수(水)', ganName: '계수(癸水)', desc: '단비처럼 촉촉하고 감성적인 癸水(계수)의 기운입니다.' }
         };
 
-        return ganOhaengMap[dayGan] || { element: "목(木)", ganName: "목(木)", desc: "나무의 기운입니다." };
+        const info = ganOhaengMap[pillar.dayGan] || { element: "목(木)", ganName: "갑목(甲木)", desc: "나무의 기운입니다." };
+        return {
+            element: info.element,
+            ganName: info.ganName,
+            dayGan: pillar.dayGan,
+            dayZhi: pillar.dayZhi,
+            desc: info.desc
+        };
     }
 
-    // 2단계: 생년월일 6자리(YYMMDD) 입력받아 사주 일간 및 오행 판별
+    function getSajuElementFromBirth(inputVal) {
+        return getSajuDetailFromBirth(inputVal);
+    }
+
     function calculateElement() {
         const inputVal = document.getElementById('birthInput').value.trim();
         if (inputVal.length !== 6) {
@@ -918,13 +1168,8 @@
         let mm = parseInt(inputVal.substring(2, 4), 10);
         let dd = parseInt(inputVal.substring(4, 6), 10);
 
-        if (isNaN(yy) || isNaN(mm) || isNaN(dd)) {
-            alert('생년월일 6자리(YYMMDD) 숫자를 정확히 입력해주소서!');
-            return;
-        }
-
-        if (mm < 1 || mm > 12) {
-            alert('올바른 월(1~12월)을 입력해주소서!');
+        if (isNaN(yy) || isNaN(mm) || isNaN(dd) || mm < 1 || mm > 12) {
+            alert('올바른 생년월일 숫자를 입력해주소서!');
             return;
         }
 
@@ -938,15 +1183,16 @@
 
         userState.birth = inputVal;
 
-        const resultInfo = getSajuElementFromBirth(inputVal);
+        const resultInfo = getSajuDetailFromBirth(inputVal);
 
-        userState.dayGan = resultInfo.ganName;
+        userState.dayGan = resultInfo.dayGan;
+        userState.dayZhi = resultInfo.dayZhi;
         userState.element = resultInfo.element;
 
         document.getElementById('elementResultText').innerHTML = `
             <b>[ 정통 사주 명리학 감정 결과 ]</b><br><br>
             생년월일: <b>${fullYear}년 ${mm}월 ${dd}일</b><br>
-            사주 일주 천간: <b>${resultInfo.ganName}</b><br>
+            사주 일주 천간: <b>${resultInfo.ganName}</b> (${resultInfo.dayGan}${resultInfo.dayZhi})<br>
             본원 오행: <b>${resultInfo.element}</b><br><br>
             ${resultInfo.desc}
         `;
@@ -957,203 +1203,152 @@
         showStep('step2_result');
     }
 
-    // 오프라인 궁합 - 1. 대상자 조회 함수
-    function searchOfflineTarget() {
-        const name = document.getElementById('offTargetName').value.trim();
-        const gender = document.getElementById('offTargetGender').value;
-        const birth = document.getElementById('offTargetBirth').value.trim();
-        const calendarType = document.getElementById('offTargetCalendarType').value;
-        const birthTime = document.getElementById('offTargetBirthTime').value;
-        const birthRegion = document.getElementById('offTargetBirthRegion').value.trim();
-
-        if (!name || !birth || birth.length !== 6) {
-            alert("상대방 성함과 생년월일 6자리를 꼭 입력해주소서!");
-            return;
-        }
-
-        let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
-
-        // 대장 조회
-        let found = registrations.find(p => p.name === name && p.birth === birth);
-
-        if (!found) {
-            const elemInfo = getSajuElementFromBirth(birth);
-            found = {
-                name: name,
-                gender: gender || "미지정",
-                birth: birth,
-                calendarType: calendarType,
-                birthTime: birthTime,
-                birthRegion: birthRegion || "미지정",
-                element: elemInfo.element,
-                dept: "오프라인 등록 인연",
-                age: "-",
-                insta: "오프라인 매칭",
-                emoji: "🏵️",
-                intro: "오프라인 현장 궁합 대상자이옵니다."
-            };
-        } else {
-            if (gender) found.gender = gender;
-            if (calendarType) found.calendarType = calendarType;
-            if (birthTime) found.birthTime = birthTime;
-            if (birthRegion) found.birthRegion = birthRegion;
-            if (!found.element) {
-                found.element = getSajuElementFromBirth(birth).element;
+    function generateDynamicLoveFortune(name, birth, gender, dayGan, element) {
+        const ganMap = {
+            '甲': {
+                star: "식상(食傷 - 식신/상관)",
+                comp: "화(火) 또는 토(土)",
+                period: "2026년 가을~겨울 및 2027년 초봄",
+                style: "솔직 담백하고 뻗어나가는 직진형 연애 스타일! 사랑에 빠지면 당당하고 다정하게 매력을 발산합니다.",
+                desc: "2026년 丙午년(병오년)은 甲木(갑목) 일간인 당신에게 강렬한 식상(食傷)의 기운을 불어넣습니다. 표현력과 개성이 크게 만개하여 호감을 가진 이성에게 자연스럽게 매력을 어필할 수 있는 결정적 시기입니다.",
+                action: ["1. 대화 시 당당한 미소와 다정한 어조 유지하기", "2. 신록의 청록색 또는 화사한 붉은 계열 포인트 소품 활용", "3. 상대방의 장점을 사소하더라도 칭찬해 주는 표현 자주 쓰기", "4. 축제나 모임 등 인연이 모이는 자리에 자주 참석하기", "5. SNS 프로필을 밝고 기분 좋은 원색 사진으로 가꾸기"],
+                item: "자신감을 불어넣는 세련된 에코백 또는 깔끔한 가죽 소재 팔찌"
+            },
+            '乙': {
+                star: "식상(食傷 - 상관/식신)",
+                comp: "화(火) 또는 금(金)",
+                period: "2026년 하반기 및 2027년 봄 시즌",
+                style: "유연하고 따뜻하며 상대를 깊이 배려하는 낭만적 연애 스타일! 섬세한 관심으로 연인의 마음을 사로잡습니다.",
+                desc: "乙木(을목) 일간에게 2026 丙午년은 화려한 불꽃이 활짝 피어나는 상관(傷官)의 운입니다. 당신이 지닌 섬세함에 재치와 센스가 더해져 다정한 인연과의 만남이 활발해지는 시기입니다.",
+                action: ["1. 다정다감한 눈맞춤과 경청하는 습관 기르기", "2. 파스텔 톤이나 따스한 핑크 계열 의상으로 호감도 올리기", "3. 상대방의 취향을 세심히 기억해 소소한 감동 건네기", "4. 가벼운 산책이나 은은한 카페 데이트 즐기기", "5. 마음에 드는 상대에게 조급해하지 않고 온화하게 다가가기"],
+                item: "향긋한 플로럴 향수 또는 은은하게 반짝이는 은/로즈골드 액세서리"
+            },
+            '丙': {
+                star: "비겁(比劫 - 비견/겁재)",
+                comp: "토(土) 또는 금(金)",
+                period: "2026년 가을 시즌 및 2027년 여름",
+                style: "태양처럼 열정적이고 밝으며 솔직한 연애 스타일! 숨김없이 호감을 표현하며 활기찬 연애를 주도합니다.",
+                desc: "丙火(병화) 일간에게 2026 丙午년은 나 자신과 같은 강렬한 비견(比肩)의 해입니다. 자신감과 주관이 확실해지며, 동년배나 마음이 통하는 친구 같은 인연과 극적인 연애 기운이 이어집니다.",
+                action: ["1. 지나친 고집보다는 상대방의 의견을 들어주는 포용력 발휘하기", "2. 주황색이나 밝은 아이보리 계열 컬러 활용하기", "3. 야외 활동이나 동아리 모임에 활발히 참여하기", "4. 상대방을 존중하는 칭찬을 아끼지 않기", "5. 자신감 넘치면서도 친근한 표정 관리하기"],
+                item: "활력을 더해주는 패션 시계 또는 깔끔한 스니커즈"
+            },
+            '丁': {
+                star: "비겁(比劫 - 겁재/비견)",
+                comp: "금(金) 또는 수(水)",
+                period: "2026년 겨울 및 2027년 상반기",
+                style: "촛불처럼 온화하고 은근히 깊은 열정을 지닌 연애 스타일! 은은한 따스함으로 상대를 감싸 안아줍니다.",
+                desc: "丁火(정화) 일간에게 2026년은 내면의 열정이 조화롭게 커지는 시기입니다. 당신의 은은하고 깊은 다정함이 이성에게 특별하게 각인되는 운세입니다.",
+                action: ["1. 속마음을 진솔하고 다정하게 어휘로 표현하기", "2. 차분한 딥브라운 또는 로즈골드 톤 스타일링", "3. 조용하고 분위기 있는 장소에서 차분하게 대화 나누기", "4. 상대방의 작은 고민을 온정 어리게 위로해주기", "5. SNS나 메시지 답장을 성의 있게 다정하게 작성하기"],
+                item: "온기를 간직한 텀블러 또는 감성적인 분위기의 무드등 소품"
+            },
+            '戊': {
+                star: "인성(印星 - 편인/정인)",
+                comp: "금(金) 또는 수(水)",
+                period: "2026년 가을 및 2027년 봄",
+                style: "너른 대지처럼 든든하고 포용력 넘치는 연애 스타일! 믿음직스러운 모습으로 연인의 든든한 버팀목이 됩니다.",
+                desc: "戊土(무토) 일간에게 2026 丙午년은 나를 다정하게 응원하고 품어주는 정인(正印)의 기운이 가득합니다. 나를 깊이 아껴주고 이해해 주는 귀인 같은 인연이 찾아오는 귀한 시기입니다.",
+                action: ["1. 경청하는 든든한 태도로 신뢰감 심어주기", "2. 단정한 차콜 및 베이지 계열 의상 코디하기", "3. 약속 시간을 엄수하고 신용을 최우선으로 하기", "4. 깊이 있는 진솔한 주제로 대화 나누기", "5. 따스하고 온화한 미소로 인사를 건네기"],
+                item: "고급스러운 가죽 다이어리 또는 깔끔한 프레임 안경/액세서리"
+            },
+            '己': {
+                star: "인성(印星 - 정인/편인)",
+                comp: "수(水) 또는 목(木)",
+                period: "2026년 하반기 전반",
+                style: "비옥한 흙처럼 자상하고 섬세하며 신중한 연애 스타일! 세심한 배려로 포근함을 선사합니다.",
+                desc: "己土(기토) 일간에게 2026년은 마음의 안식과 자상함이 빛나는 해입니다. 당신의 상냥함과 신중함에 반한 이성이 성큼 다가오는 길한 기운이 형성됩니다.",
+                action: ["1. 다정한 호응과 긍정적인 추임새 넣기", "2. 따뜻한 옐로우/카키 계열 의상 입기", "3. 정성스럽게 작성한 메모나 따뜻한 메시지 전하기", "4. 상대방의 기분을 세심히 살펴 배려해주기", "5. 차분하고 안정된 어조로 진심 전하기"],
+                item: "촉촉한 핸드크림 또는 은은한 아로마 디퓨저/소품"
+            },
+            '庚': {
+                star: "관성(官星 - 편관/정관)",
+                comp: "수(水) 또는 목(木)",
+                period: "2026년 가을~겨울 대길",
+                style: "강인한 무쇠처럼 의리가 넘치고 결단력 있는 연애 스타일! 확실한 태도로 깔끔하고 당당하게 직진합니다.",
+                desc: "庚金(경금) 일간에게 2026 丙午년은 나를 단련시키고 당당하게 만들어주는 관성(官星)의 운입니다. 남녀 모두 사주 내에 신뢰감 넘치는 인연과 연애 결실의 운이 강력하게 들어옵니다.",
+                action: ["1. 확실하고 명확한 어조로 호감을 당당히 드러내기", "2. 깔끔하고 각 잡힌 셔츠나 블랙/네이비 의상 연출", "3. 예의 바르고 신사적인 매너 지키기", "4. 우유부단하지 않게 데이트 코스나 장소 리드하기", "5. 약속을 소중히 지키며 진실함을 어필하기"],
+                item: "깔끔한 금속 메탈 시계 또는 명함지갑/카드지갑"
+            },
+            '辛': {
+                star: "관성(官星 - 정관/편관)",
+                comp: "목(木) 또는 화(火)",
+                period: "2026년 하반기~2027년 초",
+                style: "보석처럼 빛나고 섬세하며 완벽주의적인 연애 스타일! 정교한 감각과 높은 매너로 이성을 사로잡습니다.",
+                desc: "辛金(신금) 일간에게 2026년은 나를 반짝반짝 조명해 주는 정관(正官)의 시기입니다. 세련된 매력이 도드라지며 당당하고 이상적인 이성이 다가오는 최고의 연애 운입니다.",
+                action: ["1. 깔끔하고 단정한 용모와 스타일 유지하기", "2. 보석처럼 세련된 실버 또는 화이트 톤 스타일링", "3. 예의 바르고 기품 있는 어휘 사용하기", "4. 상대방의 장점을 예리하게 짚어 칭찬해주기", "5. 내면의 감정을 수줍어말고 은은하게 표현하기"],
+                item: "반짝이는 실버 반지나 목걸이, 혹은 고급 펜"
+            },
+            '壬': {
+                star: "재성(財星 - 편재/정재)",
+                comp: "목(木) 또는 화(火)",
+                period: "2026년 가을 및 2027년 봄",
+                style: "넓은 바다처럼 지혜롭고 포용력 넘치는 연애 스타일! 자연스럽고 유쾌하게 상대를 편안하게 해줍니다.",
+                desc: "壬水(임수) 일간에게 2026 丙午년은 활발한 결실과 결합을 뜻하는 재성(財星)의 기운입니다. 연애 기회가 매우 풍성해지며, 나와 가치관이 찰떡같이 맞는 천생연분을 만날 운세입니다.",
+                action: ["1. 센스 넘치는 유머와 활기찬 대화 이끌기", "2. 시원한 블루 또는 감성적인 딥그레이 톤 착장", "3. 맛있는 음식이나 기분 좋은 소품 나눠먹기", "4. 유연하고 유쾌한 태도로 분위기 환하게 밝히기", "5. 좋아하는 마음을 감추지 말고 자연스럽게 드러내기"],
+                item: "블루투스 이어폰 또는 감성적인 미니 가죽 소품"
+            },
+            '癸': {
+                star: "재성(財星 - 정재/편재)",
+                comp: "화(火) 또는 토(土)",
+                period: "2026년 하반기 전반",
+                style: "단비처럼 촉촉하고 감성적이며 섬세한 통찰력을 지닌 연애 스타일! 깊은 공감대로 연인의 마음을 녹입니다.",
+                desc: "癸水(계수) 일간에게 2026년은 메마른 땅을 적시는 단비처럼 다정한 인연 결실의 운입니다. 상대방과 깊은 감정적 공감대를 나누며 연인 관계로 급발전하는 운세이옵니다.",
+                action: ["1. 상대방의 말에 깊이 공감하고 지덕 있는 리액션 건네기", "2. 촉촉하고 깔끔한 분위기의 코디 연출", "3. 은은한 미소와 다정한 어조로 이야기나누기", "4. 소소한 일상을 공유하며 친밀감 키우기", "5. 따스한 마음을 담은 소소한 선물 건네기"],
+                item: "촉촉한 립밤 또는 오행 기운을 돋우는 투명 원석 스트랩"
             }
-        }
-
-        offlineTargetUser = found;
-
-        const resultArea = document.getElementById('offTargetCardArea');
-        resultArea.style.display = 'block';
-
-        let actionButtonHtml = '';
-        if (userState.name && userState.birth) {
-            actionButtonHtml = `<button onclick="calculateDirectOfflineCompatibility()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 [ ${userState.name} ] 님의 궁합 확인하기 ➔</button>`;
-        } else {
-            actionButtonHtml = `<button onclick="proceedToOfflineApplicant()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 내 궁합 확인하러 가기 (내 정보 입력) ➔</button>`;
-        }
-
-        resultArea.innerHTML = `
-            <div class="partner-profile-card">
-                <h3>${found.emoji || '🏵️'} ${found.name} 님의 대상자 정보 확인</h3>
-                <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
-                <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
-                <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
-                <b>• 사주 오행:</b> ${found.element || '오행미정'}<br>
-                <b>• 소속/정보:</b> ${found.dept || '-'}
-            </div>
-            ${actionButtonHtml}
-        `;
-    }
-
-    // 이미 유저 정보가 있을 때 바로 오프라인 궁합 계산
-    function calculateDirectOfflineCompatibility() {
-        if (!offlineTargetUser || !userState.name) {
-            proceedToOfflineApplicant();
-            return;
-        }
-
-        document.getElementById('offAppName').value = userState.name;
-        document.getElementById('offAppGender').value = userState.gender || "남";
-        document.getElementById('offAppBirth').value = userState.birth || "";
-        document.getElementById('offAppCalendarType').value = userState.calendarType || "양력";
-        document.getElementById('offAppBirthTime').value = userState.birthTime || "모름";
-        document.getElementById('offAppBirthRegion').value = userState.birthRegion || "미지정";
-
-        calculateOfflineCompatibility();
-    }
-
-    // 오프라인 궁합 - 2. 내 정보 입력 단계로 이동
-    function proceedToOfflineApplicant() {
-        if (!offlineTargetUser) {
-            alert("대상자를 먼저 조회해주소서!");
-            return;
-        }
-
-        document.getElementById('offTargetSummaryBanner').innerHTML = `
-            <b>💞 궁합 매칭 대상자:</b> ${offlineTargetUser.name} 님 (${offlineTargetUser.gender}, ${offlineTargetUser.element})
-        `;
-
-        showStep('step_offline_applicant');
-    }
-
-    // 오프라인 궁합 - 3. 오프라인 궁합 계산 및 결과 출력
-    function calculateOfflineCompatibility() {
-        const appName = document.getElementById('offAppName').value.trim() || userState.name || "신청자";
-        const appGender = document.getElementById('offAppGender').value || userState.gender || "남";
-        const appBirth = document.getElementById('offAppBirth').value.trim() || userState.birth || "";
-        const appCalendarType = document.getElementById('offAppCalendarType').value || userState.calendarType || "양력";
-        const appBirthTime = document.getElementById('offAppBirthTime').value || userState.birthTime || "모름";
-        const appBirthRegion = document.getElementById('offAppBirthRegion').value.trim() || userState.birthRegion || "미지정";
-
-        if (!appGender || !appBirth || appBirth.length !== 6) {
-            alert("본인 성별과 생년월일 6자리를 정확히 입력해주소서!");
-            return;
-        }
-
-        const appElemInfo = getSajuElementFromBirth(appBirth);
-
-        const applicantUser = {
-            name: appName,
-            gender: appGender,
-            birth: appBirth,
-            calendarType: appCalendarType,
-            birthTime: appBirthTime,
-            birthRegion: appBirthRegion,
-            element: appElemInfo.element,
-            ganName: appElemInfo.ganName
         };
 
-        const target = offlineTargetUser;
+        const g = ganMap[dayGan] || ganMap['甲'];
 
-        // 두 사람 프로필 (반응형 2컬럼 레이아웃)
-        document.getElementById('offlineProfilesArea').innerHTML = `
-            <div class="offline-compare-grid">
-                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px;">
-                    <h3 style="font-size:14px;">👤 ${applicantUser.name} (본인)</h3>
-                    <b>• 오행:</b> ${applicantUser.element}<br>
-                    <b>• 성별:</b> ${applicantUser.gender}<br>
-                    <b>• 생일:</b> ${applicantUser.birth}<br>
-                    <b>• 시간:</b> ${applicantUser.birthTime || '모름'}<br>
-                    <b>• 지역:</b> ${applicantUser.birthRegion}
-                </div>
-                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px; border-color:#b85d38;">
-                    <h3 style="font-size:14px; color:#b85d38;">💖 ${target.name} (상대방)</h3>
-                    <b>• 오행:</b> ${target.element}<br>
-                    <b>• 성별:</b> ${target.gender}<br>
-                    <b>• 생일:</b> ${target.birth}<br>
-                    <b>• 시간:</b> ${target.birthTime || '모름'}<br>
-                    <b>• 지역:</b> ${target.birthRegion}
-                </div>
-            </div>
-        `;
-
-        // 궁합 로직
-        const myElem = applicantUser.element ? applicantUser.element.charAt(0) : "목";
-        const opElem = target.element ? target.element.charAt(0) : "화";
-
-        const sangsaengMap = { '목': '화', '화': '토', '토': '금', '금': '수', '수': '목' };
-        const sanggeukMap = { '목': '토', '토': '수', '수': '화', '화': '금', '금': '목' };
-
-        let score = 80;
-        let relationTitle = "";
-        let paragraph1 = "";
-        let paragraph2 = "";
-
-        if (myElem === opElem) {
-            score = Math.floor(Math.random() * 6) + 86;
-            relationTitle = "비화(比和) - 마음이 통하는 평행선";
-            paragraph1 = `<b>${applicantUser.name}</b> 님과 <b>${target.name}</b> 님은 두 사람 모두 동일한 <b>${applicantUser.element}</b>의 본원 기운을 타고났사옵니다. 사주 명리학에서 '비화(比和)'는 서로의 성향과 대화 유기성을 깊이 이해할 수 있는 동질적 유대의 궁합입니다. 가식 없이 편안한 분위기 속에서 친밀감을 금세 높여갈 수 있습니다.`;
-            paragraph2 = `서로의 기운이 동일하기에 때로는 자기 고집이 대립될 수 있으나, 서로 한 발짝 양보하는 조화를 발휘한다면 오랜 세월 든든한 조력자이자 천생연분으로 발전할 최고의 궁합입니다.`;
-        } else if (sangsaengMap[myElem] === opElem) {
-            score = Math.floor(Math.random() * 5) + 95;
-            relationTitle = "상생(相生) - 나를 활짝 꽃피워주는 천생연분";
-            paragraph1 = `<b>${applicantUser.name}</b> 님의 ${applicantUser.element} 기운이 상대방 <b>${target.name}</b> 님의 ${target.element} 기운을 활발히 북돋아 주는 '상생(相生)'의 유기적 천생연분입니다. 명리학에서 상생은 맑은 샘물이 흘러 만물을 적시는 형국으로, 함께 시간을 보낼수록 서로의 기운이 피어나고 포근함이 배가되는 궁합입니다.`;
-            paragraph2 = `만남 자체에서 매우 밝은 긍정적 에너지가 솟아나므로, 오프라인 만남이나 대화 시 자연스럽고 웃음 넘치는 순간을 가꾸어 가시기를 적극 추천하옵니다.`;
-        } else if (sangsaengMap[opElem] === myElem) {
-            score = Math.floor(Math.random() * 5) + 93;
-            relationTitle = "상생(相生) - 나를 따뜻하게 품어주는 인연";
-            paragraph1 = `상대방 <b>${target.name}</b> 님의 ${target.element} 기운이 <b>${applicantUser.name}</b> 님의 ${applicantUser.element} 기운을 따스하게 포용해 주는 완벽한 '상생(相生)'의 길연입니다. 상대가 나를 응원하고 든든하게 받쳐주는 형국이므로, 상대방 옆에 있을 때 커다란 안도감과 안정감을 얻게 됩니다.`;
-            paragraph2 = `상대가 건네는 온정과 다정함에 감사하는 마음을 표현하며 대화를 이어가신다면 서로에게 대체 불가능한 소중한 존재로 자리 잡게 될 것입니다.`;
-        } else {
-            score = Math.floor(Math.random() * 11) + 76;
-            relationTitle = "상극(相克) - 강렬하게 사로잡히는 묘연";
-            paragraph1 = `<b>${applicantUser.name}</b> 님과 <b>${target.name}</b> 님의 기운은 사주 명리학에서 서로에게 강한 자극과 견제를 주는 '상극(相克)'의 관계입니다. 그러나 상극은 부딪힘에 그치지 않고, 나에게 없는 완벽히 상반된 매력에 강렬하게 끌리는 '묘연(妙緣)'의 상징이옵니다.`;
-            paragraph2 = `서로 다른 성향이 선사하는 긴장감과 신선함이 오프라인 만남에서 커다란 매력 포인트로 작용하므로, 상대방의 다름을 존중하고 접근한다면 어떤 인연보다 극적인 로맨스를 완성하게 될 것입니다.`;
-        }
-
-        document.getElementById('offlineMatchResultText').innerHTML = `
-            <b>[ 📜 오프라인 사주 궁합 종합 감정 ]</b><br><br>
-            궁합 진단 점수: <b>[ ${score}점 / ${relationTitle} ]</b><br><br>
-            ${paragraph1}<br><br>
-            ${paragraph2}
-        `;
-
-        showStep('step_offline_result');
+        return `
+<b>[ 💘 2026년 사주명리학 정통 연애운 감정 ]</b><br><br>
+• <b>나를 표현하는 본원 오행:</b> <b>${element} (${dayGan}日干)</b><br>
+• <b>나와 사주적으로 잘 어울리는 상대 오행:</b> <b>${g.comp}</b><br>
+• <b>사주 십성(十星) 연애 운세:</b> <b>2026 丙午년 ${g.star} 운</b><br><br>
+• <b>3년 이내 강력한 인연의 시기:</b> <b>${g.period}</b>에 나의 일간 기운을 활짝 꽃피워줄 강렬한 사주적 길연이 들어옵니다.<br><br>
+• <b>사주로 본 나의 연애 스타일:</b> ${g.style}<br><br>
+• <b>연애운 심층 명리 분석:</b> ${g.desc}<br><br>
+• <b>2026년 하반기 연애운 상승 실천 5가지:</b><br>
+${g.action[0]}<br>
+${g.action[1]}<br>
+${g.action[2]}<br>
+${g.action[3]}<br>
+${g.action[4]}<br><br>
+• <b>🍀 나만의 연애 행운의 아이템:</b> <b>${g.item}</b>
+`;
     }
 
-    // 오늘의 운세만 실행
+    function generateDynamicTodayFortune(name, birth, gender, dayGan, element) {
+        const ganTodayMap = {
+            '甲': { color: "초록색 (Green)", num: "3, 8", item: "싱그러운 음료 또는 목재 소재 소품", total: "식신의 창의력이 발휘되어 아이디어가 샘솟고 매력이 드러나는 하루입니다.", money: "순탄하며 소소한 투자나 소비가 기분 전환이 됩니다.", study: "집중력이 뛰어난 날입니다.", love: "솔직한 호감 표현이 상대방의 마음을 움직입니다.", relation: "주변 사람들이 나의 밝은 활력에 이끌려 다가옵니다.", doAct: "미소 지으며 밝게 먼저 인사 건네기", dontAct: "섣부르게 상대를 조급하게 독촉하기", advice: "당신의 당당한 소신이 오늘 가장 커다란 매력입니다!" },
+            '乙': { color: "파스텔 핑크 (Pastel Pink)", num: "1, 6", item: "플로럴 향수 또는 꽃 모양 키링", total: "상관의 센스와 유연함으로 주변을 온화하게 밝히는 운세입니다.", money: "안정적이며 나를 위한 소소한 선물이 유익합니다.", study: "창의적인 응용력이 고조되어 성과가 높아집니다.", love: "섬세한 배려가 상대방에게 깊은 안도감을 선사합니다.", relation: "오해가 풀어지고 다정한 대화가 만발합니다.", doAct: "따뜻한 경청과 호응 보여주기", dontAct: "타인의 작은 실수에 예민하게 반응하기", advice: "당신의 유연하고 따스한 마음이 길연을 불러옵니다!" },
+            '丙': { color: "주황색 (Orange)", num: "2, 7", item: "패션 시계 또는 깔끔한 스니커즈", total: "비견의 강렬한 활력이 도래하여 능동적으로 일과 연애를 이끄는 날입니다.", money: "지출이 다소 발생할 수 있으나 유익한 인맥 형성에 쓰입니다.", study: "동료나 친구와 함께 공부할 때 시너지가 솟구칩니다.", love: "당당하고 열정적인 모습이 이성의 시선을 사로잡습니다.", relation: "의리 넘치는 행동으로 인기가 한층 상승합니다.", doAct: "자신감 넘치게 대화를 주도하기", dontAct: "자기 고집만 내세우고 타인 무시하기", advice: "솔직한 온기가 인연의 문을 활짝 열어줍니다!" },
+            '丁': { color: "로즈골드 (Rose Gold)", num: "5, 9", item: "따뜻한 차 한 잔 또는 은은한 텀블러", total: "온화한 불꽃처럼 깊고 조화로운 내면의 매력이 돋보이는 날입니다.", money: "절약과 계획적 지출이 빛을 발하는 안정적인 날입니다.", study: "차분하고 정교하게 과제를 완수해냅니다.", love: "은은한 다정함에 상대방이 깊이 빠져듭니다.", relation: "진솔한 속마음을 터놓기에 대단히 적합합니다.", doAct: "따뜻한 어휘로 진심을 전달하기", dontAct: "감정을 숨기고 시무룩하게 굴기", advice: "당신의 차분한 진심은 언제나 통하는 법입니다!" },
+            '戊': { color: "베이지/옐로우 (Beige)", num: "5, 10", item: "가죽 다이어리 또는 고급스러운 가방", total: "정인의 포용력이 펼쳐져 주변에서 나를 돕고 인정해 주는 날입니다.", money: "뜻밖의 재물이나 소소한 행운이 흘러들어옵니다.", study: "학업과 연구의 기운이 극에 달해 성과가 뛰어납니다.", love: "든든하고 신뢰감 넘치는 분위기가 상대 마음을 녹입니다.", relation: "나를 아껴주는 사람들의 귀인 운이 작용합니다.", doAct: "넉넉한 마음으로 웃어 넘겨주기", dontAct: "경솔하게 약속을 어기거나 미루기", advice: "산처럼 든든한 당신의 모습이 가장 빛납니다!" },
+            '己': { color: "브라운 (Brown)", num: "4, 9", item: "촉촉한 핸드크림 또는 파우치", total: "자상함과 신중함이 결실을 이루어 뜻깊은 보람을 얻는 하루입니다.", money: "실속 있는 거래나 알뜰한 기쁨이 따릅니다.", study: "꼼꼼하게 체계적으로 정리가 잘 되는 날입니다.", love: "세심한 관심 표현에 상대방이 커다란 감동을 받습니다.", relation: "주변의 고민을 들어주며 평판이 대단히 좋아집니다.", doAct: "상대방의 노력을 진심으로 칭찬하기", dontAct: "지나치게 의심하거나 주저하기", advice: "당신의 자상한 따뜻함이 최고의 부적입니다!" },
+            '庚': { color: "화이트/네이비 (White)", num: "4, 8", item: "금속 메탈 소재 액세서리나 카드지갑", total: "편관의 결단력과 의리가 결실을 맺어 주변의 인정을 받는 날입니다.", money: "투명하고 확실한 소비가 이로움을 선사합니다.", study: "목표 의식이 명확해져 빠른 속도로 일을 마칩니다.", love: "단당하고 절제된 매너가 커다란 호감을 불러일으킵니다.", relation: "리더십을 발휘하여 모임을 신나게 만듭니다.", doAct: "결단력 있게 깔끔한 태도 보여주기", dontAct: "감정적으로 거친 언사 사용하기", advice: "당신의 당당한 의리가 빛을 발하는 날입니다!" },
+            '辛': { color: "실버 (Silver)", num: "1, 7", item: "반짝이는 실버 반지나 보석 모티브 소품", total: "정관의 고결함과 보석 같은 매력이 반짝반짝 빛을 발하는 대길한 날입니다.", money: "금전운이 상승하며 나를 가꾸는 투자에 좋습니다.", study: "예리한 분석력과 완벽한 감각이 돋보입니다.", love: "세련된 매너로 상대의 마음을 깊이 단숨에 사로잡습니다.", relation: "품격 있는 태도로 인지도가 쑥쑥 올라갑니다.", doAct: "단정하고 깔끔한 용모 연출하기", dontAct: "작은 실수에 사소하게 연연하기", advice: "당신은 존재 자체로 반짝이는 보석입니다!" },
+            '壬': { color: "딥블루 (Deep Blue)", num: "2, 6", item: "블루투스 이어폰 또는 세련된 미니 소품", total: "넓은 바다 같은 지혜와 재성의 기운이 차올라 성과가 풍성한 날입니다.", money: "재물운이 활성화되어 유익한 기회가 들어옵니다.", study: "시야가 넓어져 복잡한 문제도 시원하게 해결합니다.", love: "유쾌하고 분위기 있는 대화로 연애운이 급상승합니다.", relation: "유연한 포용력으로 모든 사람과 잘 어울립니다.", doAct: "상대방과 함께 맛있는 음식 나누기", dontAct: "남의 시선을 지나치게 의식하기", advice: "넓은 바다처럼 여유롭고 당당하게 행동하세요!" },
+            '癸': { color: "스카이블루 (Sky Blue)", num: "3, 9", item: "투명한 원석 스트랩 또는 깔끔한 보틀", total: "단비처럼 촉촉한 감성과 영감이 피어나 마음이 풍요로운 날입니다.", money: "지출이 가치 있게 쓰이며 유용한 정보를 얻습니다.", study: "섬세한 직관력이 발휘되어 이해도가 높습니다.", love: "깊은 감정적 공감대가 형성되어 연애 기운이 깊어집니다.", relation: "온화한 온정으로 사람들의 마음을 따스하게 해줍니다.", doAct: "따뜻한 음료 한 잔 나누며 대화하기", dontAct: "혼자만의 생각에 갇혀 침묵하기", advice: "촉촉한 당신의 다정함이 상대 마음을 적십니다!" }
+        };
+
+        const gt = ganTodayMap[dayGan] || ganTodayMap['甲'];
+
+        return `
+<b>[ 🔮 2026년 10월 1일 사주명리학 정통 오늘의 운세 ]</b><br><br>
+• <b>행운의 컬러:</b> <b>${gt.color}</b><br>
+• <b>행운의 숫자:</b> <b>${gt.num}</b><br>
+• <b>오늘의 행운의 아이템:</b> <b>${gt.item}</b><br><br>
+• <b>오늘의 총운:</b> ${gt.total}<br>
+• <b>재물운:</b> ${gt.money}<br>
+• <b>학업/직업운:</b> ${gt.study}<br>
+• <b>연애운:</b> ${gt.love}<br>
+• <b>인간관계운:</b> ${gt.relation}<br><br>
+• <b>오늘 하면 좋은 행동:</b> ${gt.doAct}<br>
+• <b>오늘 피하면 좋은 행동:</b> ${gt.dontAct}<br><br>
+• <b>오늘의 한줄 조언:</b> <i>"${gt.advice}"</i>
+`;
+    }
+
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
         const gender = document.getElementById('todayGender').value;
@@ -1202,21 +1397,8 @@
             setTimeout(() => {
                 document.getElementById('todayLoading').style.display = 'none';
                 document.getElementById('todayResultBox').style.display = 'block';
-                document.getElementById('todayResultBox').innerHTML = `
-                    <b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 분석 ]</b><br><br>
-                    • <b>행운의 컬러:</b> 맑은 신록을 닮은 <b>청록색(Teal)</b><br>
-                    • <b>행운의 숫자:</b> 변화와 도약을 상징하는 <b>3, 8</b><br>
-                    • <b>오늘의 행운의 아이템:</b> 은은한 오행의 기운을 밝혀주는 <b>원목 소재의 작은 열쇠고리 또는 따뜻한 보온 보틀</b><br><br>
-                    • <b>오늘의 총운:</b> 사주 명리상 오늘 하루는 음양의 조화가 매끄럽게 흐르는 형국입니다. 막혔던 오행의 기운이 풀리며 새로운 아이디어나 활력이 활발히 피어나는 쾌조의 날이옵니다.<br>
-                    • <b>재물운:</b> 예상치 못한 작은 행운이나 나눔이 따르는 날입니다. 소소한 소비가 오히려 마음의 유대감을 높여줍니다.<br>
-                    • <b>학업/직업운:</b> 집중력이 대단히 고조되는 시기입니다. 중요한 결정이나 학습 과제를 처리하기에 매우 유효합니다.<br>
-                    • <b>연애운:</b> 나의 본원 오행 기운이 활기를 띠어 주변 이성들에게 다정하고 친근한 매력이 어필됩니다.<br>
-                    • <b>인간관계운:</b> 오랜 오해가 풀어지거나 뜻밖의 온정 어린 대화를 나누게 됩니다.<br><br>
-                    • <b>오늘 하면 좋은 행동:</b> 미소를 머금고 먼저 주변 사람에게 따뜻한 안부 전하기<br>
-                    • <b>오늘 피하면 좋은 행동:</b> 타인의 감정에 지나치게 개입하거나 경솔하게 고집 피우기<br><br>
-                    • <b>오늘의 한줄 조언:</b> <i>"당신이 지닌 밝은 미소가 오늘의 가장 강력한 행운의 부적입니다!"</i>
-                `;
-            }, 1000);
+                document.getElementById('todayResultBox').innerHTML = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+            }, 800);
             return;
         }
 
@@ -1235,13 +1417,12 @@
             document.getElementById('todayResultBox').style.display = 'block';
             document.getElementById('todayResultBox').innerHTML = `<b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 감정 ]</b><br><br>${formatMarkdown(text)}`;
         } catch (e) {
-            alert('Gemini API 연동 중 오류가 발생하여 시뮬레이션 운세로 제공합니다.');
+            alert('Gemini API 연동 중 오류가 발생하여 정통 사주 명리 결과로 제공합니다.');
             localStorage.removeItem('gemini_api_key');
             processTodayFortuneAI();
         }
     }
 
-    // 인연등록서 작성 및 연애운 + 오늘의 운세 AI 분석
     async function processMatchAI() {
         userState.name = document.getElementById('userName').value.trim() || "익명참가자";
         userState.gender = document.getElementById('userGender').value;
@@ -1319,34 +1500,9 @@
                 document.getElementById('matchAiLoading').style.display = 'none';
                 document.getElementById('matchAiResultContainer').style.display = 'block';
 
-                document.getElementById('aiLoveResult').innerHTML = `
-                    <b>[ 💘 2026년 연애운 심층 분석 ]</b><br><br>
-                    • <b>나를 나타내는 핵심 오행:</b> <b>${userState.element}</b><br>
-                    • <b>나와 찰떡궁합인 상대 오행:</b> <b>${getComplementaryElement(userState.element)}</b><br><br>
-                    • <b>3년 이내 가장 강력한 인연의 시기:</b> 2026년 가을~겨울 및 2027년 봄 시즌에 강렬한 기운의 인연이 도래합니다.<br>
-                    • <b>나의 연애 스타일 분석:</b> 솔직 담백하면서도 한번 마음에 품은 인연에게 진실한 신뢰를 보여주는 깊고 따스한 연애 스타일입니다. 상대방의 감정 변화를 직관적으로 파악하는 매력이 뛰어납니다.<br>
-                    • <b>연애운 심층 분석 해설:</b> 올해 사주 내 오행의 흐름이 수(水)와 목(木) 기운의 조화를 이루어, 나를 따뜻하게 북돋아주는 인연과의 만남이 유력합니다. 조급해하기보다는 나의 매력을 자연스럽게 드러내는 자리를 늘려갈수록 이상형에 가까운 상대와의 진솔한 대화가 열릴 것입니다.<br><br>
-                    • <b>2026년 하반기 연애운 상승을 위한 실천 5가지:</b><br>
-                    1. 새로운 인연의 장소(축제, 모임 등)에 적극적으로 발걸음하기<br>
-                    2. 나를 돋보이게 하는 오행 맞춤형 의상 컬러 적극 활용하기<br>
-                    3. 상대방과 대화 시 따스한 눈맞춤과 다정한 어조 유지하기<br>
-                    4. 상대의 장점을 사소하더라도 크게 칭찬해주는 어휘 쓰기<br>
-                    5. SNS 프로필 사진을 자신감 넘치고 밝은 모습으로 가꾸기<br><br>
-                    • <b>🍀 나만의 연애 행운의 아이템:</b> 따뜻한 느낌을 더해주는 붉은 실 장식 노리개 및 은은하게 반짝이는 로즈골드 계열 액세서리/소품
-                `;
-
-                document.getElementById('aiTodayResult').innerHTML = `
-                    <b>[ 🔮 2026년 10월 1일 오늘의 운세 ]</b><br><br>
-                    • <b>행운의 컬러:</b> 주황색(Orange) / <b>행운의 숫자:</b> 5, 9<br>
-                    • <b>오늘의 행운의 아이템:</b> 마음의 안정을 가져다주는 <b>따뜻한 차 한 잔 또는 은은한 시트러스향 향수</b><br><br>
-                    • <b>총운:</b> 음양의 기운이 균형을 이루어 주변 기운과 따뜻하게 유기적으로 교감하는 기분 좋은 하루입니다.<br>
-                    • <b>연애운:</b> 우연한 기회에 마주친 상대와의 소소한 대화에서 깊은 매력이 전달되는 만남의 기운이 깃들어 있습니다.<br>
-                    • <b>재물/학업/인간관계:</b> 베푸는 마음이 더 큰 복으로 돌아오는 길한 날입니다.<br><br>
-                    • <b>오늘 하면 좋은 행동:</b> 솔직하고 상쾌하게 먼저 인사 건네기<br>
-                    • <b>오늘 피하면 좋은 행동:</b> 타인의 서툰 대답에 쉽게 오해하거나 조급해하기<br>
-                    • <b>오늘의 한줄 조언:</b> <i>"밝은 표정이 오늘 당신에게 최고의 인연을 가져다 줄 것입니다!"</i>
-                `;
-            }, 1000);
+                document.getElementById('aiLoveResult').innerHTML = generateDynamicLoveFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+                document.getElementById('aiTodayResult').innerHTML = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+            }, 800);
             return;
         }
 
@@ -1379,27 +1535,16 @@
             document.getElementById('aiTodayResult').innerHTML = `<b>[ 🔮 오늘의 운세 (2026년 10월 1일) ]</b><br><br>${formatMarkdown(todayText)}`;
 
         } catch (e) {
-            alert('Gemini API 연동 중 오류가 발생하여 시뮬레이션 결과로 대체합니다.');
+            alert('Gemini API 연동 중 오류가 발생하여 사주 명리 정통 결과로 대체합니다.');
             localStorage.removeItem('gemini_api_key');
             processMatchAI();
         }
     }
 
-    // 마크다운 형식 변환
     function formatMarkdown(text) {
         return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
     }
 
-    function getComplementaryElement(elem) {
-        if (!elem) return "화(火)";
-        if (elem.includes("목")) return "화(火) 또는 토(土)";
-        if (elem.includes("화")) return "토(土) 또는 금(金)";
-        if (elem.includes("토")) return "금(金) 또는 수(水)";
-        if (elem.includes("금")) return "수(水) 또는 목(木)";
-        return "목(木) 또는 화(火)";
-    }
-
-    // API Key 저장
     function saveApiKey() {
         const key = document.getElementById('geminiApiKeyInput').value.trim();
         if (key) {
@@ -1410,7 +1555,6 @@
         }
     }
 
-    // 5단계: 오행 상자 무작위 이성 매칭
     function openBoxList(boxName) {
         userState.chosenBox = boxName;
         let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
@@ -1434,7 +1578,7 @@
                 </div>
             `;
             actionBtnContainer.innerHTML = `
-                <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">데이터 저장하고 초기화면 돌아가기</button>
+                <button style="background-color: #5a3e36; margin-top: 15px;" onclick="saveAndReset()">📜 인연 대장에 등록 후 인연 기다리기</button>
                 <button style="background-color: #8c6d62; margin-top: 5px;" onclick="showStep('step5')">다른 상자 고르기</button>
             `;
             showStep('step5_list');
@@ -1455,7 +1599,7 @@
         }
         localStorage.setItem('yeonbun_registrations', JSON.stringify(registrations));
         
-        alert("작성하신 인연 정보가 대장에 저장되었습니다. 메인 화면으로 돌아갑니다.");
+        alert("작성하신 인연 정보가 대장에 접수되었습니다. 인연을 기다리는 마음으로 초기 화면으로 이동합니다.");
         location.reload();
     }
 
@@ -1475,6 +1619,71 @@
         showStep('step6');
     }
 
+    function calculateSajuMatchEngine(userA, userB) {
+        const detailA = getSajuDetailFromBirth(userA.birth);
+        const detailB = getSajuDetailFromBirth(userB.birth);
+
+        const ganA = detailA.dayGan;
+        const ganB = detailB.dayGan;
+        const zhiA = detailA.dayZhi;
+        const zhiB = detailB.dayZhi;
+
+        const stemCombo = [ganA, ganB].sort().join('');
+        const isStemHe = ['甲己', '乙庚', '丙辛', '丁壬', '戊癸'].includes(stemCombo);
+
+        const zhiCombo = [zhiA, zhiB].sort().join('');
+        const isBranchHe = ['丑子', '亥寅', '卯戌', '辰酉', '巳申', '午未'].includes(zhiCombo);
+
+        const elemA = detailA.element.charAt(0);
+        const elemB = detailB.element.charAt(0);
+
+        const sangsaengMap = { '목': '화', '화': '토', '토': '금', '금': '수', '수': '목' };
+
+        let baseScore = 78;
+        let relationTitle = "";
+        let explanation1 = "";
+        let paragraph2 = "";
+
+        if (isStemHe) {
+            baseScore += 16;
+            relationTitle = "천간명합(天干明合) - 하늘이 점지한 천생연분";
+            explanation1 = `<b>${userA.name}</b> 님의 <b>${detailA.ganName}</b>와 <b>${userB.name}</b> 님의 <b>${detailB.ganName}</b>가 천간합(天干合)을 이루어, 명리학적으로 성격과 영혼이 깊게 조화를 이루는 최고의 천생연분입니다. 서로를 기분 좋게 끌어당기는 끌림이 대단히 강합니다.`;
+        } else if (isBranchHe) {
+            baseScore += 14;
+            relationTitle = "지지육합(地支六合) - 삶의 안식처가 되는 정연";
+            explanation1 = `<b>${userA.name}</b> 님(${detailA.dayGan}${detailA.dayZhi})과 <b>${userB.name}</b> 님(${detailB.dayGan}${detailB.dayZhi})은 일지(日支) 가 육합(六合)을 이루어 현실 생활 패턴과 감정선이 매우 유기적으로 일치하는 기운입니다.`;
+        } else if (elemA === elemB) {
+            baseScore += 10;
+            relationTitle = "비화(比和) - 마음이 통하는 평행선";
+            explanation1 = `<b>${userA.name}</b> 님과 <b>${userB.name}</b> 님은 둘 다 동일한 <b>${detailA.element}</b> 기운을 가져 서로의 기분과 동선을 직관적으로 이해할 수 있는 편안한 관계입니다.`;
+        } else if (sangsaengMap[elemA] === elemB || sangsaengMap[elemB] === elemA) {
+            baseScore += 12;
+            relationTitle = "상생(相生) - 서로를 활짝 꽃피우는 길연";
+            explanation1 = `<b>${userA.name}</b> 님의 ${detailA.element} 기운과 <b>${userB.name}</b> 님의 ${detailB.element} 기운이 서로를 살려주는 상생(相生)의 흐름으로, 함께할수록 시너지가 폭발하는 선순환 궁합입니다.`;
+        } else {
+            baseScore += 6;
+            relationTitle = "상극(相克) - 강렬하게 사로잡히는 묘연";
+            explanation1 = `<b>${userA.name}</b> 님과 <b>${userB.name}</b> 님의 오행은 상반되어 서로 자극을 주는 '상극(相克)'의 관계입니다. 나에게 없는 완벽히 새로운 매력에 강하게 끌리는 묘연의 특성을 지닙니다.`;
+        }
+
+        let hash = 0;
+        const str = userA.name + userA.birth + userB.name + userB.birth;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash << 5) - hash + str.charCodeAt(i);
+            hash |= 0;
+        }
+        const finalScore = Math.min(99, Math.max(72, baseScore + (Math.abs(hash) % 7)));
+
+        paragraph2 = `두 사람의 사주 일주(${detailA.dayGan}${detailA.dayZhi} ↔ ${detailB.dayGan}${detailB.dayZhi})는 오행의 밸런스를 매끄럽게 보완해주고 있으므로, 진솔하게 마음을 나누며 인스타그램 계정이나 오프라인 대화를 시작하시면 깊은 신뢰와 호감을 가꾸어 갈 것입니다.`;
+
+        return {
+            score: finalScore,
+            title: relationTitle,
+            exp1: explanation1,
+            exp2: paragraph2
+        };
+    }
+
     function renderMatchResult() {
         const p = userState.matchedPartner;
         if (!p) return;
@@ -1492,46 +1701,13 @@
             </div>
         `;
 
-        const myElem = userState.element ? userState.element.charAt(0) : "목";
-        const opElem = p.element ? p.element.charAt(0) : "화";
-
-        const sangsaengMap = { '목': '화', '화': '토', '토': '금', '금': '수', '수': '목' };
-        const sanggeukMap = { '목': '토', '토': '수', '수': '화', '화': '금', '금': '목' };
-
-        let score = 80;
-        let relationTitle = "";
-        let paragraph1 = "";
-        let paragraph2 = "";
-
-        if (myElem === opElem) {
-            score = Math.floor(Math.random() * 6) + 85;
-            relationTitle = "비화(比和) - 마음이 통하는 평행선";
-            paragraph1 = `신청자 <b>${userState.name}</b> 님과 <b>${fullName}</b> 님은 둘 다 동일한 <b>${userState.element}</b> 기운을 지니고 있어, 사주 명리학적으로 '비화(比和)'의 인연에 해당합니다. 같은 기운을 타고났기에 서로의 행동 패턴과 기분을 직관적으로 이해할 수 있으며, 가식 없이 편안한 분위기 속에서 빠르게 친밀감을 쌓아갈 수 있는 조합입니다.`;
-            paragraph2 = `다만 기운이 같아 고집이 부딪힐 때에는 서로 양보하기 어려울 수 있으니, 대화할 때 한 발짝 물러서는 배려를 발휘한다면 오랜 친구처럼 든든하고 기댈 수 있는 깊은 관계로 발전할 것입니다.`;
-        } else if (sangsaengMap[myElem] === opElem) {
-            score = Math.floor(Math.random() * 5) + 95;
-            relationTitle = "상생(相生) - 나를 살려주는 천생연분";
-            paragraph1 = `<b>${userState.name}</b> 님의 ${userState.element} 기운이 상대방 <b>${fullName}</b> 님의 ${p.element} 기운을 활발히 북돋아 주는 '상생(相生)'의 유기적 궁합입니다. 명리학에서 상생은 막힘없는 물흐름과 같아, 함께 시간을 보낼수록 서로의 부족함이 자연스럽게 채워지고 에너지가 선순환하는 최상의 관계를 뜻합니다.`;
-            paragraph2 = `서로에게 긍정적인 자극과 온기를 전달해주므로 만남 자체가 매우 유쾌하며, 인스타그램 계정(<code>${p.insta}</code>)으로 대화를 시작하시면 금세 깊은 공감대를 형성하게 될 최고의 길연입니다.`;
-        } else if (sangsaengMap[opElem] === myElem) {
-            score = Math.floor(Math.random() * 5) + 93;
-            relationTitle = "상생(相生) - 나를 따뜻하게 품어주는 인연";
-            paragraph1 = `상대방 <b>${fullName}</b> 님의 ${p.element} 기운이 <b>${userState.name}</b> 님의 ${userState.element} 기운을 따스하게 받쳐주는 '상생(相生)'의 궁합입니다. 상대가 나를 응원하고 감싸주는 형국이므로, 상대와 함께 있을 때 마음에 커다란 안도감과 편안함을 느끼게 됩니다.`;
-            paragraph2 = `상대방이 전하는 따뜻한 포용력에 감사를 표하며 인스타 계정(<code>${p.insta}</code>)을 통해 반갑게 인사를 건네보시기를 적극 권장합니다.`;
-        } else {
-            score = Math.floor(Math.random() * 11) + 75;
-            relationTitle = "상극(相克) - 강렬하게 끌리는 묘연";
-            paragraph1 = `<b>${userState.name}</b> 님과 <b>${fullName}</b> 님의 기운은 사주 명리학에서 서로를 견제하고 자극하는 '상극(相克)'의 관계입니다. 그러나 상극은 무조건적인 부딪힘이 아니라, 나에게 없는 완벽히 상반된 매력에 강렬하게 사로잡히는 '묘연(妙緣)'의 상징이기도 합니다.`;
-            paragraph2 = `서로 다른 성향이 주는 긴장감과 신선한 매력이 서로를 강하게 끌어당기므로, 상대의 다름을 인정하고 다가선다면 그 어떤 인연보다 스릴 있고 매력적인 로맨스를 완성할 수 있습니다.`;
-        }
-
-        userState.matchScore = score;
+        const res = calculateSajuMatchEngine(userState, p);
 
         document.getElementById('matchResultText').innerHTML = `
             <b>[ 📜 연분청 사주 궁합 결과지 ]</b><br><br>
-            궁합 진단: <b>[ ${score}점 / ${relationTitle} ]</b><br><br>
-            ${paragraph1}<br><br>
-            ${paragraph2}
+            궁합 진단: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
+            ${res.exp1}<br><br>
+            ${res.exp2}
         `;
     }
 
@@ -1628,6 +1804,145 @@
             localStorage.setItem('yeonbun_registrations', JSON.stringify(registrations));
             renderAdminData();
         }
+    }
+
+    function searchOfflineTarget() {
+        const name = document.getElementById('offTargetName').value.trim();
+        const gender = document.getElementById('offTargetGender').value;
+        const birth = document.getElementById('offTargetBirth').value.trim();
+        const calendarType = document.getElementById('offTargetCalendarType').value;
+        const birthTime = document.getElementById('offTargetBirthTime').value;
+        const birthRegion = document.getElementById('offTargetBirthRegion').value.trim();
+
+        if (!name || !birth || birth.length !== 6) {
+            alert("상대방 성함과 생년월일 6자리를 꼭 입력해주소서!");
+            return;
+        }
+
+        let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
+        let found = registrations.find(p => p.name === name && p.birth === birth);
+
+        if (!found) {
+            alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
+            document.getElementById('offTargetCardArea').style.display = 'none';
+            return;
+        }
+
+        if (gender) found.gender = gender;
+        if (calendarType) found.calendarType = calendarType;
+        if (birthTime) found.birthTime = birthTime;
+        if (birthRegion) found.birthRegion = birthRegion;
+
+        offlineTargetUser = found;
+
+        const resultArea = document.getElementById('offTargetCardArea');
+        resultArea.style.display = 'block';
+
+        let actionButtonHtml = '';
+        if (userState.name && userState.birth) {
+            actionButtonHtml = `<button onclick="calculateDirectOfflineCompatibility()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 [ ${userState.name} ] 님의 궁합 확인하기 ➔</button>`;
+        } else {
+            actionButtonHtml = `<button onclick="proceedToOfflineApplicant()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 내 궁합 확인하러 가기 (내 정보 입력) ➔</button>`;
+        }
+
+        resultArea.innerHTML = `
+            <div class="partner-profile-card">
+                <h3>${found.emoji || '🏵️'} ${found.name} 님의 대상자 정보 확인</h3>
+                <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
+                <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
+                <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
+                <b>• 사주 오행:</b> ${found.element || '오행미정'}<br>
+                <b>• 소속/정보:</b> ${found.dept || '-'}
+            </div>
+            ${actionButtonHtml}
+        `;
+    }
+
+    function calculateDirectOfflineCompatibility() {
+        if (!offlineTargetUser || !userState.name) {
+            proceedToOfflineApplicant();
+            return;
+        }
+
+        document.getElementById('offAppName').value = userState.name;
+        document.getElementById('offAppGender').value = userState.gender || "남";
+        document.getElementById('offAppBirth').value = userState.birth || "";
+        document.getElementById('offAppCalendarType').value = userState.calendarType || "양력";
+        document.getElementById('offAppBirthTime').value = userState.birthTime || "모름";
+        document.getElementById('offAppBirthRegion').value = userState.birthRegion || "미지정";
+
+        calculateOfflineCompatibility();
+    }
+
+    function proceedToOfflineApplicant() {
+        if (!offlineTargetUser) {
+            alert("대상자를 먼저 조회해주소서!");
+            return;
+        }
+
+        document.getElementById('offTargetSummaryBanner').innerHTML = `
+            <b>💞 궁합 매칭 대상자:</b> ${offlineTargetUser.name} 님 (${offlineTargetUser.gender}, ${offlineTargetUser.element})
+        `;
+
+        showStep('step_offline_applicant');
+    }
+
+    function calculateOfflineCompatibility() {
+        const appName = document.getElementById('offAppName').value.trim() || userState.name || "신청자";
+        const appGender = document.getElementById('offAppGender').value || userState.gender || "남";
+        const appBirth = document.getElementById('offAppBirth').value.trim() || userState.birth || "";
+        const appCalendarType = document.getElementById('offAppCalendarType').value || userState.calendarType || "양력";
+        const appBirthTime = document.getElementById('offAppBirthTime').value || userState.birthTime || "모름";
+        const appBirthRegion = document.getElementById('offAppBirthRegion').value.trim() || userState.birthRegion || "미지정";
+
+        if (!appGender || !appBirth || appBirth.length !== 6) {
+            alert("본인 성별과 생년월일 6자리를 정확히 입력해주소서!");
+            return;
+        }
+
+        const applicantUser = {
+            name: appName,
+            gender: appGender,
+            birth: appBirth,
+            calendarType: appCalendarType,
+            birthTime: appBirthTime,
+            birthRegion: appBirthRegion,
+            element: getSajuDetailFromBirth(appBirth).element
+        };
+
+        const target = offlineTargetUser;
+
+        document.getElementById('offlineProfilesArea').innerHTML = `
+            <div class="offline-compare-grid">
+                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px;">
+                    <h3 style="font-size:14px;">👤 ${applicantUser.name} (본인)</h3>
+                    <b>• 오행:</b> ${applicantUser.element}<br>
+                    <b>• 성별:</b> ${applicantUser.gender}<br>
+                    <b>• 생일:</b> ${applicantUser.birth}<br>
+                    <b>• 시간:</b> ${applicantUser.birthTime || '모름'}<br>
+                    <b>• 지역:</b> ${applicantUser.birthRegion}
+                </div>
+                <div class="partner-profile-card" style="margin-bottom:0; font-size:12px; border-color:#b85d38;">
+                    <h3 style="font-size:14px; color:#b85d38;">💖 ${target.name} (상대방)</h3>
+                    <b>• 오행:</b> ${target.element}<br>
+                    <b>• 성별:</b> ${target.gender}<br>
+                    <b>• 생일:</b> ${target.birth}<br>
+                    <b>• 시간:</b> ${target.birthTime || '모름'}<br>
+                    <b>• 지역:</b> ${target.birthRegion}
+                </div>
+            </div>
+        `;
+
+        const res = calculateSajuMatchEngine(applicantUser, target);
+
+        document.getElementById('offlineMatchResultText').innerHTML = `
+            <b>[ 📜 오프라인 사주 궁합 종합 감정 ]</b><br><br>
+            궁합 진단 점수: <b>[ ${res.score}점 / ${res.title} ]</b><br><br>
+            ${res.exp1}<br><br>
+            ${res.exp2}
+        `;
+
+        showStep('step_offline_result');
     }
 </script>
 
