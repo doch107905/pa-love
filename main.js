@@ -1,7 +1,6 @@
 // ==========================================
 // 0. Vercel 환경 변수 및 파이어베이스 설정
 // ==========================================
-// Vercel 대시보드의 Environment Variables에 등록한 키를 자동으로 읽어옵니다.
 const envApiKey = (
     import.meta.env.VITE_PNU_PA_LOVE || 
     import.meta.env.VITE_GEMINI_API_KEY || 
@@ -61,22 +60,19 @@ async function fetchAllRegistrations() {
     const activeDb = getFirebaseDb();
     if (activeDb) {
         try {
-            let snapshot = await activeDb.ref('registrations').once('value');
-            let val = snapshot.val();
-            
-            if (!val) {
-                try {
-                    const altDb = firebase.app().database("https://pa-love-doch107905-default-rtdb.firebaseio.com");
-                    snapshot = await altDb.ref('registrations').once('value');
-                    val = snapshot.val();
-                } catch(e) {}
-            }
+            // DB 연결 지연 시 무반응 방지를 위한 2.5초 타임아웃 설정
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("DB Timeout")), 2500)
+            );
+            const dbPromise = activeDb.ref('registrations').once('value');
+            const snapshot = await Promise.race([dbPromise, timeoutPromise]);
+            const val = snapshot.val();
 
             if (val) {
                 list = Object.keys(val).map(key => ({ _fbKey: key, ...val[key] }));
             }
         } catch (e) {
-            console.error("Firebase 읽기 실패:", e);
+            console.warn("Firebase 읽기 지연/실패 -> 로컬 데이터 활용:", e);
         }
     }
     if (list.length === 0) {
@@ -85,7 +81,8 @@ async function fetchAllRegistrations() {
 
     const map = new Map();
     list.forEach(item => {
-        const id = (item.insta && item.insta !== '-') ? item.insta : (item.name + '_' + item.birth);
+        if (!item.name || !item.birth) return;
+        const id = (item.insta && item.insta !== '-') ? item.insta : (item.name.trim() + '_' + item.birth.trim());
         if (!map.has(id)) {
             map.set(id, item);
         } else {
@@ -363,7 +360,7 @@ function getTodayPrompt(u) {
 }
 
 // ==========================================
-// 3. AI 및 폼 제출 처리 (Gemini 2.5 Flash Lite 모델)
+// 3. AI 및 폼 제출 처리 (Gemini 3 Flash 모델)
 // ==========================================
 async function processTodayFortuneAI() {
     const name = document.getElementById('todayName').value.trim() || "익명참가자";
@@ -397,13 +394,13 @@ async function processTodayFortuneAI() {
     document.getElementById('todayLoading').style.display = 'block';
     document.getElementById('todayResultBox').style.display = 'none';
 
-    // 로컬 스토리지 또는 환경 변수에서 키를 읽어옵니다.
     const apiKey = (localStorage.getItem('gemini_api_key') || envApiKey).trim();
     let resultText = "";
 
     if (apiKey) {
         try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+            // gemini-3-flash 모델 반영
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`;
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -474,7 +471,8 @@ async function processMatchAI() {
 
     if (apiKey) {
         try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+            // gemini-3-flash 모델 반영
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`;
 
             const [respLove, respToday] = await Promise.all([
                 fetch(endpoint, {
@@ -687,29 +685,30 @@ function renderMatchResult() {
 }
 
 // ==========================================
-// 5. 관리자 기능 및 오프라인 궁합 기능
+// 5. 관리자 기능 및 오프라인 궁합 기능 (경고 안내 멘트 & 이동 처리 보장)
 // ==========================================
 async function adminGrantMatchRight() {
     const code = prompt("운영진 인증코드를 입력하소서:");
     if (code === "7693") {
         const searchName = prompt("조회할 참가자의 성함을 입력하소서:");
         if (!searchName || !searchName.trim()) {
-            alert("참가자의 성함과 생년월일을 정확히 입력해주소서!");
+            alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
             return;
         }
         const searchBirth = prompt("조회할 참가자의 생년월일 6자리(YYMMDD)를 입력하소서:");
         if (!searchBirth || !searchBirth.trim()) {
-            alert("참가자의 성함과 생년월일을 정확히 입력해주소서!");
+            alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
             return;
         }
 
         let registrations = await fetchAllRegistrations();
-        const foundUser = registrations.find(p => p.name && p.birth && p.name.trim() === searchName.trim() && p.birth.trim() === searchBirth.trim());
+        const foundUser = registrations.find(p => p.name && p.birth && p.name.trim().replace(/\s+/g, '') === searchName.trim().replace(/\s+/g, '') && p.birth.trim() === searchBirth.trim());
 
         if (foundUser) {
             userState = { ...foundUser };
-            alert(`[${foundUser.name}] 님의 데이터를 확인했습니다! 오행 상자 선택 창으로 이동합니다.`);
-            showStep('step5');
+            alert(`[${foundUser.name}] 님의 데이터를 확인했습니다! 오행과 궁합 설명 창으로 이동합니다.`);
+            // 있으면 오행과 궁합 설명(step4)으로 이동
+            showStep('step4');
         } else {
             alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
         }
@@ -799,12 +798,10 @@ async function deleteData(key) {
 }
 
 async function searchOfflineTarget() {
-    const name = document.getElementById('offTargetName').value.trim();
-    const gender = document.getElementById('offTargetGender').value;
-    const birth = document.getElementById('offTargetBirth').value.trim();
-    const calendarType = document.getElementById('offTargetCalendarType').value;
-    const birthTime = document.getElementById('offTargetBirthTime').value;
-    const birthRegion = document.getElementById('offTargetBirthRegion').value.trim();
+    const nameInput = document.getElementById('offTargetName');
+    const birthInput = document.getElementById('offTargetBirth');
+    const name = nameInput ? nameInput.value.trim() : "";
+    const birth = birthInput ? birthInput.value.trim() : "";
 
     if (!name || !birth || birth.length !== 6) {
         alert("상대방 성함과 생년월일 6자리를 꼭 입력해주소서!");
@@ -812,13 +809,23 @@ async function searchOfflineTarget() {
     }
 
     let registrations = await fetchAllRegistrations();
-    let found = registrations.find(p => p.name && p.birth && p.name.trim() === name && p.birth.trim() === birth);
+    let found = registrations.find(p => 
+        p.name && p.birth && 
+        p.name.trim().replace(/\s+/g, '') === name.replace(/\s+/g, '') && 
+        p.birth.trim() === birth
+    );
 
     if (!found) {
         alert("인연등록서에 접수되지 않은 인원이옵니다. 성함과 생년월일을 다시금 확인해주소서!");
-        document.getElementById('offTargetCardArea').style.display = 'none';
+        const cardArea = document.getElementById('offTargetCardArea');
+        if (cardArea) cardArea.style.display = 'none';
         return;
     }
+
+    const gender = document.getElementById('offTargetGender')?.value;
+    const calendarType = document.getElementById('offTargetCalendarType')?.value;
+    const birthTime = document.getElementById('offTargetBirthTime')?.value;
+    const birthRegion = document.getElementById('offTargetBirthRegion')?.value?.trim();
 
     if (gender) found.gender = gender;
     if (calendarType) found.calendarType = calendarType;
@@ -828,26 +835,28 @@ async function searchOfflineTarget() {
     offlineTargetUser = found;
 
     const resultArea = document.getElementById('offTargetCardArea');
-    resultArea.style.display = 'block';
+    if (resultArea) {
+        resultArea.style.display = 'block';
 
-    let actionButtonHtml = '';
-    if (userState.name && userState.birth) {
-        actionButtonHtml = `<button onclick="calculateDirectOfflineCompatibility()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 [ ${userState.name} ] 님의 궁합 확인하기 ➔</button>`;
-    } else {
-        actionButtonHtml = `<button onclick="proceedToOfflineApplicant()" style="background-color:#5a3e36; margin-top:5px;">[ ${found.name} ] 님과 내 궁합 확인하러 가기 (내 정보 입력) ➔</button>`;
+        let actionButtonHtml = '';
+        if (userState.name && userState.birth) {
+            actionButtonHtml = `<button onclick="calculateDirectOfflineCompatibility()" style="background-color:#5a3e36; margin-top:10px;">[ ${found.name} ] 님과 [ ${userState.name} ] 님의 궁합 확인하기 ➔</button>`;
+        } else {
+            actionButtonHtml = `<button onclick="proceedToOfflineApplicant()" style="background-color:#5a3e36; margin-top:10px;">[ ${found.name} ] 님과 내 궁합 확인하러 가기 (내 정보 입력) ➔</button>`;
+        }
+
+        resultArea.innerHTML = `
+            <div class="partner-profile-card">
+                <h3>${found.emoji || '🏵️'} ${found.name} 님의 대상자 정보 확인</h3>
+                <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
+                <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
+                <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
+                <b>• 사주 오행:</b> ${found.element || getSajuDetailFromBirth(found.birth).element}<br>
+                <b>• 소속/정보:</b> ${found.dept || '-'}
+            </div>
+            ${actionButtonHtml}
+        `;
     }
-
-    resultArea.innerHTML = `
-        <div class="partner-profile-card">
-            <h3>${found.emoji || '🏵️'} ${found.name} 님의 대상자 정보 확인</h3>
-            <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
-            <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
-            <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
-            <b>• 사주 오행:</b> ${found.element || '오행미정'}<br>
-            <b>• 소속/정보:</b> ${found.dept || '-'}
-        </div>
-        ${actionButtonHtml}
-    `;
 }
 
 function calculateDirectOfflineCompatibility() {
@@ -1087,7 +1096,7 @@ function generateDynamicTodayFortune(name, birth, gender, dayGan, element) {
 }
 
 // ==========================================
-// 8. HTML onclick 이벤트 연결용 바인딩
+// 7. HTML 이벤트 연결 바인딩
 // ==========================================
 window.showStep = showStep;
 window.goBack = goBack;
