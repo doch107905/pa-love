@@ -1131,7 +1131,23 @@
         console.error("Firebase 초기화 에러:", e);
     }
 
-    // 파이어베이스 / LocalStorage 통합 데이터 읽기
+    // LocalStorage 백업 전용
+    function saveToLocalStorage(data) {
+        try {
+            let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
+            let idx = registrations.findIndex(p => (p.insta && data.insta && p.insta === data.insta) || (p.name === data.name && p.birth === data.birth));
+            if (idx !== -1) {
+                registrations[idx] = { ...registrations[idx], ...data };
+            } else {
+                registrations.push(data);
+            }
+            localStorage.setItem('yeonbun_registrations', JSON.stringify(registrations));
+        } catch (e) {
+            console.error("LocalStorage 저장 오류:", e);
+        }
+    }
+
+    // 파이어베이스 / LocalStorage 데이터 읽기
     async function fetchAllRegistrations() {
         if (db) {
             try {
@@ -1145,8 +1161,9 @@
         return JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
     }
 
-    // 파이어베이스 / LocalStorage 통합 데이터 저장 및 수정
+    // 파이어베이스 / LocalStorage 통합 데이터 저장 (안전성 보장)
     async function saveRegistration(data) {
+        const sanitizedData = JSON.parse(JSON.stringify(data));
         if (db) {
             try {
                 const snapshot = await db.ref('registrations').once('value');
@@ -1154,32 +1171,52 @@
                 let existingKey = null;
 
                 for (let key in val) {
-                    if ((val[key].insta && data.insta && val[key].insta === data.insta) || 
-                        (val[key].name === data.name && val[key].birth === data.birth)) {
+                    if ((val[key].insta && sanitizedData.insta && val[key].insta === sanitizedData.insta) || 
+                        (val[key].name === sanitizedData.name && val[key].birth === sanitizedData.birth)) {
                         existingKey = key;
                         break;
                     }
                 }
 
                 if (existingKey) {
-                    await db.ref('registrations/' + existingKey).update(data);
+                    await db.ref('registrations/' + existingKey).update(sanitizedData);
                 } else {
-                    await db.ref('registrations').push(data);
+                    await db.ref('registrations').push(sanitizedData);
                 }
             } catch (e) {
                 console.error("Firebase 저장 실패:", e);
             }
         }
+        saveToLocalStorage(sanitizedData);
+    }
 
-        // LocalStorage 백업 저장
-        let registrations = JSON.parse(localStorage.getItem('yeonbun_registrations') || '[]');
-        let idx = registrations.findIndex(p => (p.insta && data.insta && p.insta === data.insta) || (p.name === data.name && p.birth === data.birth));
-        if (idx !== -1) {
-            registrations[idx] = { ...registrations[idx], ...data };
-        } else {
-            registrations.push(data);
-        }
-        localStorage.setItem('yeonbun_registrations', JSON.stringify(registrations));
+    // 백그라운드 안전 비동기 저장 (네트워크 대기 방지)
+    function saveRegistrationWithTimeout(data, ms = 1500) {
+        return new Promise((resolve) => {
+            let completed = false;
+            const timer = setTimeout(() => {
+                if (!completed) {
+                    completed = true;
+                    saveToLocalStorage(data);
+                    resolve();
+                }
+            }, ms);
+
+            saveRegistration(data).then(() => {
+                if (!completed) {
+                    completed = true;
+                    clearTimeout(timer);
+                    resolve();
+                }
+            }).catch((err) => {
+                if (!completed) {
+                    completed = true;
+                    clearTimeout(timer);
+                    saveToLocalStorage(data);
+                    resolve();
+                }
+            });
+        });
     }
 
     // ==========================================
@@ -1362,14 +1399,59 @@
         showStep('step2_result');
     }
 
+    // 프롬프트 텍스트 헬퍼
+    function getLovePrompt(u) {
+        return `
+* 이름 : ${u.name}
+* 생년월일 : ${u.birth}
+* 태어난 시간 : ${u.birthTime}
+* 양력/음력 : ${u.calendarType}
+* 성별 : ${u.gender}
+* 출생 지역 : ${u.birthRegion}
+
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 손님들이 돈을 내고 보는 만큼 만족감 있게 자세하게 적어줘.
+정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘.
+
+- 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
+- 나의 연애 스타일을 분석해줘.
+- 2026년 하반기 연애운을 높이기 위해 지금부터 실천하면 좋을 행동 5가지를 추천해줘.
+- 나에게 좋은 연애 기운과 인연을 당겨다 줄 행운의 아이템을 분석 및 추천해줘.
+- 연애운 분석결과에 대해 자세히 설명해줘.
+
+* 태어난 시간을 모르면 시주를 제외해 분석해줘.
+`;
+    }
+
+    function getTodayPrompt(u) {
+        return `
+* 이름 : ${u.name}
+* 생년월일 : ${u.birth}
+* 태어난 시간 : ${u.birthTime}
+* 양력/음력 : ${u.calendarType}
+* 성별 : ${u.gender}
+* 출생 지역 : ${u.birthRegion}
+
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
+정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘.
+
+- 행운의 컬러와 행운의 숫자를 분석해줘.
+- 오늘의 행운의 아이템을 추천해줘.
+- 오늘의 운세 총운, 재물운, 학업운, 연애운, 인간관계운을 알려줘.
+- 오늘 하면 좋은 행동, 피하면 좋은 행동을 알려줘
+- 오늘의 한줄 조언을 알려줘.
+
+* 태어난 시간을 모르면 시주를 제외해 분석해줘.
+`;
+    }
+
     // ==========================================
-    // 4. AI 및 폼 제출 처리
+    // 4. AI 및 폼 제출 처리 (안전 비동기 보장)
     // ==========================================
     async function processTodayFortuneAI() {
         const name = document.getElementById('todayName').value.trim() || "익명참가자";
         const gender = document.getElementById('todayGender').value;
-        const calendarType = document.getElementById('todayCalendarType').value;
-        const birthTime = document.getElementById('todayBirthTime').value;
+        const calendarType = document.getElementById('todayCalendarType').value || "양력";
+        const birthTime = document.getElementById('todayBirthTime').value || "모름";
         const birthRegion = document.getElementById('todayBirthRegion').value.trim() || "미지정";
 
         if (!gender) {
@@ -1383,67 +1465,73 @@
         userState.birthTime = birthTime;
         userState.birthRegion = birthRegion;
 
+        const todayBirthVal = document.getElementById('todayBirthDisplay').value.trim();
+        if (todayBirthVal) userState.birth = todayBirthVal;
+
+        if ((!userState.element || !userState.dayGan) && userState.birth) {
+            const sajuDetail = getSajuDetailFromBirth(userState.birth);
+            userState.element = sajuDetail.element;
+            userState.dayGan = sajuDetail.dayGan;
+            userState.dayZhi = sajuDetail.dayZhi;
+        }
+
         showStep('step_today_result');
         document.getElementById('todayLoading').style.display = 'block';
         document.getElementById('todayResultBox').style.display = 'none';
 
-        const apiKey = localStorage.getItem('gemini_api_key') || '';
+        const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
+        let resultText = "";
 
-        const todayPrompt = `
-* 이름 : ${userState.name}
-* 생년월일 : ${userState.birth}
-* 태어난 시간 : ${userState.birthTime}
-* 양력/음력 : ${userState.calendarType}
-* 성별 : ${userState.gender}
-* 출생 지역 : ${userState.birthRegion}
+        if (apiKey) {
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
+                });
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
-정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘.
-
-- 행운의 컬러와 행운의 숫자를 분석해줘.
-- 오늘의 행운의 아이템을 추천해줘.
-- 오늘의 운세 총운, 재물운, 학업운, 연애운, 인간관계운을 알려줘.
-- 오늘 하면 좋은 행동, 피하면 좋은 행동을 알려줘
-- 오늘의 한줄 조언을 알려줘.
-
-* 태어난 시간을 모르면 시주를 제외해 분석해줘.
-`;
-
-        if (!apiKey) {
-            setTimeout(() => {
-                document.getElementById('todayLoading').style.display = 'none';
-                document.getElementById('todayResultBox').style.display = 'block';
-                document.getElementById('todayResultBox').innerHTML = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
-            }, 800);
-            return;
+                if (response.ok) {
+                    const data = await response.json();
+                    resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                }
+            } catch (e) {
+                console.warn("AI 오늘의 운세 호출 실패:", e);
+            }
         }
 
-        try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: todayPrompt }] }] })
-            });
-
-            const data = await response.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "오늘의 운세 결과를 가져오지 못했습니다.";
-
-            document.getElementById('todayLoading').style.display = 'none';
-            document.getElementById('todayResultBox').style.display = 'block';
-            document.getElementById('todayResultBox').innerHTML = `<b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 감정 ]</b><br><br>${formatMarkdown(text)}`;
-        } catch (e) {
-            alert('Gemini API 연동 중 오류가 발생하여 정통 사주 명리 결과로 제공합니다.');
-            localStorage.removeItem('gemini_api_key');
-            processTodayFortuneAI();
+        if (!resultText) {
+            resultText = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+        } else {
+            resultText = formatMarkdown(resultText);
         }
+
+        document.getElementById('todayLoading').style.display = 'none';
+        document.getElementById('todayResultBox').style.display = 'block';
+        document.getElementById('todayResultBox').innerHTML = `<b>[ 🔮 2026년 10월 1일 오늘의 운세 상세 감정 ]</b><br><br>${resultText}`;
     }
 
     async function processMatchAI() {
         userState.name = document.getElementById('userName').value.trim() || "익명참가자";
         userState.gender = document.getElementById('userGender').value;
-        userState.calendarType = document.getElementById('userCalendarType').value;
-        userState.birthTime = document.getElementById('userBirthTime').value;
+
+        if (!userState.gender) {
+            alert("성별을 선택해주소서!");
+            return;
+        }
+
+        const matchBirthVal = document.getElementById('matchBirthDisplay').value.trim();
+        if (matchBirthVal) userState.birth = matchBirthVal;
+
+        if ((!userState.element || !userState.dayGan) && userState.birth) {
+            const sajuDetail = getSajuDetailFromBirth(userState.birth);
+            userState.element = sajuDetail.element;
+            userState.dayGan = sajuDetail.dayGan;
+            userState.dayZhi = sajuDetail.dayZhi;
+        }
+
+        userState.calendarType = document.getElementById('userCalendarType').value || "양력";
+        userState.birthTime = document.getElementById('userBirthTime').value || "모름";
         userState.birthRegion = document.getElementById('userBirthRegion').value.trim() || "미지정";
         userState.age = document.getElementById('userAge').value.trim() || "-";
         userState.dept = document.getElementById('userDept').value.trim() || "-";
@@ -1451,107 +1539,70 @@
         userState.emoji = document.getElementById('userEmoji').value.trim() || "✨";
         userState.intro = document.getElementById('userIntro').value.trim() || "좋은 인연 만나요!";
 
-        if (!userState.gender) {
-            alert("성별을 선택해주소서!");
-            return;
-        }
-
-        // 실시간 클라우드 DB에 사용자 등록 정보 저장
-        await saveRegistration(userState);
-
+        // 화면 즉시 전환 (UI 블로킹 방지)
         showStep('step_match_ai');
         document.getElementById('matchAiLoading').style.display = 'block';
         document.getElementById('matchAiResultContainer').style.display = 'none';
 
-        const apiKey = localStorage.getItem('gemini_api_key') || '';
+        // 데이터 백그라운드 안전 저장 (1.5초 타임아웃)
+        saveRegistrationWithTimeout(userState, 1500);
 
-        const lovePrompt = `
-* 이름 : ${userState.name}
-* 생년월일 : ${userState.birth}
-* 태어난 시간 : ${userState.birthTime}
-* 양력/음력 : ${userState.calendarType}
-* 성별 : ${userState.gender}
-* 출생 지역 : ${userState.birthRegion}
+        const apiKey = (localStorage.getItem('gemini_api_key') || '').trim();
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 손님들이 돈을 내고 보는 만큼 만족감 있게 자세하게 적어줘.
-정보를 줄게. 이걸 바탕으로 올해 연애운을 상세히 분석해줘.
+        let loveText = "";
+        let todayText = "";
 
-- 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
-- 나의 연애 스타일을 분석해줘.
-- 2026년 하반기 연애운을 높이기 위해 지금부터 실천하면 좋을 행동 5가지를 추천해줘.
-- 나에게 좋은 연애 기운과 인연을 당겨다 줄 행운의 아이템을 분석 및 추천해줘.
-- 연애운 분석결과에 대해 자세히 설명해줘.
+        if (apiKey) {
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-* 태어난 시간을 모르면 시주를 제외해 분석해줘.
-`;
+                const [respLove, respToday] = await Promise.all([
+                    fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: getLovePrompt(userState) }] }] })
+                    }),
+                    fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: getTodayPrompt(userState) }] }] })
+                    })
+                ]);
 
-        const todayPrompt = `
-* 이름 : ${userState.name}
-* 생년월일 : ${userState.birth}
-* 태어난 시간 : ${userState.birthTime}
-* 양력/음력 : ${userState.calendarType}
-* 성별 : ${userState.gender}
-* 출생 지역 : ${userState.birthRegion}
+                if (respLove.ok && respToday.ok) {
+                    const dataLove = await respLove.json();
+                    const dataToday = await respToday.json();
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘, 
-정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘.
-
-- 행운의 컬러와 행운의 숫자를 분석해줘.
-- 오늘의 행운의 아이템을 추천해줘.
-- 오늘의 운세 총운, 재물운, 학업운, 연애운, 인간관계운을 알려줘.
-- 오늘 하면 좋은 행동, 피하면 좋은 행동을 알려줘
-- 오늘의 한줄 조언을 알려줘.
-
-* 태어난 시간을 모르면 시주를 제외해 분석해줘.
-`;
-
-        if (!apiKey) {
-            setTimeout(() => {
-                document.getElementById('matchAiLoading').style.display = 'none';
-                document.getElementById('matchAiResultContainer').style.display = 'block';
-
-                document.getElementById('aiLoveResult').innerHTML = generateDynamicLoveFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
-                document.getElementById('aiTodayResult').innerHTML = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
-            }, 800);
-            return;
+                    loveText = dataLove.candidates?.[0]?.content?.parts?.[0]?.text;
+                    todayText = dataToday.candidates?.[0]?.content?.parts?.[0]?.text;
+                }
+            } catch (e) {
+                console.warn("AI API 연동 오류 발생:", e);
+            }
         }
 
-        try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-            const [respLove, respToday] = await Promise.all([
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: lovePrompt }] }] })
-                }),
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: todayPrompt }] }] })
-                })
-            ]);
-
-            const dataLove = await respLove.json();
-            const dataToday = await respToday.json();
-
-            const loveText = dataLove.candidates?.[0]?.content?.parts?.[0]?.text || "연애운 분석 결과를 가져오지 못했습니다.";
-            const todayText = dataToday.candidates?.[0]?.content?.parts?.[0]?.text || "오늘의 운세 분석 결과를 가져오지 못했습니다.";
-
-            document.getElementById('matchAiLoading').style.display = 'none';
-            document.getElementById('matchAiResultContainer').style.display = 'block';
-
-            document.getElementById('aiLoveResult').innerHTML = `<b>[ 💘 2026년 연애운 분석 ]</b><br><br>${formatMarkdown(loveText)}`;
-            document.getElementById('aiTodayResult').innerHTML = `<b>[ 🔮 오늘의 운세 (2026년 10월 1일) ]</b><br><br>${formatMarkdown(todayText)}`;
-
-        } catch (e) {
-            alert('Gemini API 연동 중 오류가 발생하여 사주 명리 정통 결과로 대체합니다.');
-            localStorage.removeItem('gemini_api_key');
-            processMatchAI();
+        // 결과 예외 보장 (API 장애 시 정통 사주 엔진 기반 자동 대체)
+        if (!loveText) {
+            loveText = generateDynamicLoveFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+        } else {
+            loveText = formatMarkdown(loveText);
         }
+
+        if (!todayText) {
+            todayText = generateDynamicTodayFortune(userState.name, userState.birth, userState.gender, userState.dayGan, userState.element);
+        } else {
+            todayText = formatMarkdown(todayText);
+        }
+
+        document.getElementById('matchAiLoading').style.display = 'none';
+        document.getElementById('matchAiResultContainer').style.display = 'block';
+
+        document.getElementById('aiLoveResult').innerHTML = `<b>[ 💘 2026년 연애운 분석 ]</b><br><br>${loveText}`;
+        document.getElementById('aiTodayResult').innerHTML = `<b>[ 🔮 오늘의 운세 (2026년 10월 1일) ]</b><br><br>${todayText}`;
     }
 
     function formatMarkdown(text) {
+        if (!text) return "";
         return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
     }
 
@@ -1566,7 +1617,7 @@
     }
 
     // ==========================================
-    // 5. 오행 상자 선택 및 매칭 로직 (클라우드 DB 연동)
+    // 5. 오행 상자 선택 및 매칭 로직
     // ==========================================
     async function openBoxList(boxName) {
         userState.chosenBox = boxName;
@@ -1952,16 +2003,23 @@
         showStep('step_offline_result');
     }
 
-    // 기본 시뮬레이션 운세 생성기
+    // 기본 사주 엔진 기반 동적 시뮬레이션
     function generateDynamicLoveFortune(name, birth, gender, dayGan, element) {
+        let gan = dayGan || "甲";
+        let elem = element || "목(木)";
         return `
 <b>[ 💘 2026년 사주명리학 정통 연애운 감정 ]</b><br><br>
-• <b>나를 표현하는 본원 오행:</b> <b>${element} (${dayGan}日干)</b><br>
+• <b>나를 표현하는 본원 오행:</b> <b>${elem} (${gan}日干)</b><br>
 • <b>2026 丙午년 사주 연애 운세:</b> 강렬한 오행의 기운이 나를 활짝 꽃피워줄 귀한 시기입니다.<br>
 • <b>3년 이내 강력한 인연의 시기:</b> 2026년 가을~겨울 및 2027년 봄에 사주적 길연이 들어옵니다.<br>
 • <b>사주로 본 나의 연애 스타일:</b> 진솔하고 은근한 따스함으로 상대를 사로잡는 스타일입니다.<br>
-• <b>연애운 상승 실천 TIP:</b> 다정한 미소를 띠고 주변 모임이나 축제 자리에 자주 참석해보세요!<br>
-• <b>🍀 나만의 연애 행운의 아이템:</b> 차분한 세련됨을 더해주는 액세서리 또는 패션 소품
+• <b>2026년 하반기 연애운 상승 실천 5가지:</b><br>
+1. 신록의 청록색 또는 화사한 붉은 계열 소품 활용하기<br>
+2. 대화 시 당당한 미소와 다정한 어조 유지하기<br>
+3. 상대방의 장점을 사소하더라도 칭찬해 주는 표현 자주 쓰기<br>
+4. 축제나 모임 등 인연이 모이는 자리에 자주 참석하기<br>
+5. SNS 프로필을 밝고 기분 좋은 모습으로 가꾸기<br><br>
+• <b>🍀 나만의 연애 행운의 아이템:</b> 자신감을 불어넣는 세련된 가죽 소품 또는 은은하게 반짝이는 액세서리
 `;
     }
 
@@ -1969,10 +2027,12 @@
         return `
 <b>[ 🔮 2026년 10월 1일 사주명리학 정통 오늘의 운세 ]</b><br><br>
 • <b>행운의 컬러:</b> 청록색 (Teal) / <b>행운의 숫자:</b> 3, 8<br>
-• <b>오늘의 행운의 아이템:</b> 따뜻한 느낌을 주는 목재 소품 또는 보온 텀블러<br>
+• <b>오늘의 행운의 아이템:</b> 따뜻한 느낌을 주는 원목 소품 또는 보온 텀블러<br>
 • <b>오늘의 총운:</b> 음양의 조화가 원활하여 주변과 기분 좋은 교감을 나눌 수 있는 쾌조의 하루입니다.<br>
+• <b>재물운/연애운:</b> 나의 본원 기운이 밝게 빛나 이성과의 대화에서 매력이 돋보입니다.<br>
 • <b>오늘 하면 좋은 행동:</b> 미소를 지으며 상대방에게 밝게 인사 건네기<br>
-• <b>오늘의 한줄 조언:</b> <i>"당신의 다정한 표현이 최고의 인연을 가져옵니다!"</i>
+• <b>오늘 피하면 좋은 행동:</b> 타인의 서툰 표현에 지나치게 섣부르게 굴기<br><br>
+• <b>오늘의 한줄 조언:</b> <i>"당신의 다정한 표현이 오늘 최고의 인연을 가져옵니다!"</i>
 `;
     }
 </script>
