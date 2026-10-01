@@ -1187,3 +1187,31 @@ window.searchOfflineTarget = searchOfflineTarget;
 window.calculateDirectOfflineCompatibility = calculateDirectOfflineCompatibility;
 window.proceedToOfflineApplicant = proceedToOfflineApplicant;
 window.calculateOfflineCompatibility = calculateOfflineCompatibility;
+
+// ==========================================
+// 8. 전체화면 토글 기능 (iOS/Safari/Android/PC 대응)
+// ==========================================
+function toggleFullScreen() {
+    const doc = document;
+    const docEl = document.documentElement;
+
+    const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
+    const exitFS = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+    const isFS = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+
+    if (!isFS) {
+        if (requestFS) {
+            requestFS.call(docEl).catch(err => {
+                console.warn("전체화면 전환 실패:", err);
+            });
+        } else {
+            alert("현재 브라우저에서는 전체화면 기능을 지원하지 않거나 제약이 있습니다.");
+        }
+    } else {
+        if (exitFS) {
+            exitFS.call(doc);
+        }
+    }
+}
+
+window.toggleFullScreen = toggleFullScreen;
