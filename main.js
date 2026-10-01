@@ -224,7 +224,7 @@ function getPureDayPillar(y, m, d) {
     return { dayGan: gans[ganIdx], dayZhi: zhis[zhiIdx] };
 }
 
-function getSajuDetailFromBirth(inputVal) {
+function getSajuDetailFromBirth(inputVal, calendarType = "양력") {
     if (!inputVal || inputVal.length !== 6) return { element: "목(木)", ganName: "갑목(甲木)", dayGan: "甲", dayZhi: "寅", desc: "기본 기운입니다." };
 
     let yy = parseInt(inputVal.substring(0, 2), 10);
@@ -238,10 +238,17 @@ function getSajuDetailFromBirth(inputVal) {
 
     try {
         if (typeof Solar !== "undefined" && typeof Solar.fromYmdHms === "function") {
-            const solar = Solar.fromYmdHms(fullYear, mm, dd, 12, 0, 0);
-            const eightChar = solar.getLunar().getEightChar();
-            pillar.dayGan = eightChar.getDayGan();
-            pillar.dayZhi = eightChar.getDayZhi();
+            if (calendarType.includes("음력") && typeof Lunar !== "undefined" && typeof Lunar.fromYmdHms === "function") {
+                const lunar = Lunar.fromYmdHms(fullYear, mm, dd, 12, 0, 0);
+                const eightChar = lunar.getEightChar();
+                pillar.dayGan = eightChar.getDayGan();
+                pillar.dayZhi = eightChar.getDayZhi();
+            } else {
+                const solar = Solar.fromYmdHms(fullYear, mm, dd, 12, 0, 0);
+                const eightChar = solar.getLunar().getEightChar();
+                pillar.dayGan = eightChar.getDayGan();
+                pillar.dayZhi = eightChar.getDayZhi();
+            }
         } else {
             pillar = getPureDayPillar(fullYear, mm, dd);
         }
@@ -299,7 +306,7 @@ function calculateElement() {
 
     userState.birth = inputVal;
 
-    const resultInfo = getSajuDetailFromBirth(inputVal);
+    const resultInfo = getSajuDetailFromBirth(inputVal, "양력");
 
     userState.dayGan = resultInfo.dayGan;
     userState.dayZhi = resultInfo.dayZhi;
@@ -333,9 +340,9 @@ function getLovePrompt(u) {
 * 양력/음력 : ${u.calendarType}
 * 성별 : ${u.gender}
 * 출생 지역 : ${u.birthRegion}
+* 확정된 사주 일간 및 오행 : ${u.element} (${u.dayGan}일간)
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 소개팅 부스에서 사용할 거야. 나를 표현하는 오행 하나와 나에게 부족하거나 나와 사주적으로 잘 어울리는 상대방의 오행을 알려줘. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘. 
-정보를 줄게. 이걸 바탕으로 올해 연애운을 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 참가자의 본원 오행은 이미 **${u.element} (${u.dayGan}일간)**으로 확정되어 있어. 절대 다른 오행이나 일간으로 바꾸지 말고, 오직 **${u.element} (${u.dayGan}일간)**을 기준으로만 올해 연애운을 심층 분석해 줘.
 
 - 3년 이내에 새로운 인연이 들어오는 가장 강력한 시기를 알려줘. 
 - 나의 연애 스타일을 분석해줘.
@@ -355,9 +362,9 @@ function getTodayPrompt(u) {
 * 양력/음력 : ${u.calendarType}
 * 성별 : ${u.gender}
 * 출생 지역 : ${u.birthRegion}
+* 확정된 사주 일간 및 오행 : ${u.element} (${u.dayGan}일간)
 
-너는 30년 이상 경력을 가진 사주명리학 전문가야. 사주 구조와 오행의 흐름을 종합적으로 분석해서 현실적이고 구체적으로 설명해 줘. 사주를 통한 축제 부스에서 사용할 거야. 간략하게 작성하고 강조해줘. 우리가 손님 한명한명한테 읽어줘야하기때문에 회전률을 고려해줘. 
-정보를 줄게. 이걸 바탕으로 오늘(2026년 10월 1일)의 운세를 분석해줘. 말투는 사주명리학 전문가처럼 해줘.
+너는 30년 이상 경력을 가진 사주명리학 전문가야. 참가자의 본원 오행은 이미 **${u.element} (${u.dayGan}일간)**으로 확정되어 있어. 절대 다른 오행이나 일간으로 바꾸지 말고, 오직 **${u.element} (${u.dayGan}일간)**을 기준으로만 오늘(2026년 10월 1일)의 운세를 분석해 줘.
 
 - 행운의 컬러와 행운의 숫자를 분석해줘.
 - 오늘의 행운의 아이템을 추천해줘.
@@ -458,7 +465,7 @@ async function processTodayFortuneAI() {
     if (todayBirthVal) userState.birth = todayBirthVal;
 
     if ((!userState.element || !userState.dayGan) && userState.birth) {
-        const sajuDetail = getSajuDetailFromBirth(userState.birth);
+        const sajuDetail = getSajuDetailFromBirth(userState.birth, userState.calendarType);
         userState.element = sajuDetail.element;
         userState.dayGan = sajuDetail.dayGan;
         userState.dayZhi = sajuDetail.dayZhi;
@@ -502,22 +509,22 @@ async function processMatchAI() {
     const matchBirthVal = document.getElementById('matchBirthDisplay')?.value?.trim();
     if (matchBirthVal) userState.birth = matchBirthVal;
 
-    if ((!userState.element || !userState.dayGan) && userState.birth) {
-        const sajuDetail = getSajuDetailFromBirth(userState.birth);
-        userState.element = sajuDetail.element;
-        userState.dayGan = sajuDetail.dayGan;
-        userState.dayZhi = sajuDetail.dayZhi;
-    }
-
     userState.calendarType = document.getElementById('userCalendarType')?.value || "양력";
     userState.birthTime = document.getElementById('userBirthTime')?.value || "모름";
     userState.birthRegion = document.getElementById('userBirthRegion')?.value?.trim() || "미지정";
     userState.age = document.getElementById('userAge')?.value?.trim() || "-";
     userState.dept = document.getElementById('userDept')?.value?.trim() || "-";
     userState.insta = document.getElementById('userInsta')?.value?.trim() || "-";
-    userState.emoji = document.getElementById('userEmoji')?.value?.trim() || "";
     userState.intro = document.getElementById('userIntro')?.value?.trim() || "좋은 인연 만나요!";
     if (!userState.chosenBox) userState.chosenBox = "미선택";
+
+    // Step 2에서 판별된 오행/일간을 유지하고, 없는 경우에만 새로 도출
+    if ((!userState.element || !userState.dayGan) && userState.birth) {
+        const sajuDetail = getSajuDetailFromBirth(userState.birth, userState.calendarType);
+        userState.element = sajuDetail.element;
+        userState.dayGan = sajuDetail.dayGan;
+        userState.dayZhi = sajuDetail.dayZhi;
+    }
 
     showStep('step_match_ai');
     const loadingEl = document.getElementById('matchAiLoading');
@@ -641,8 +648,8 @@ function selectThisPartner(partnerObj) {
 }
 
 function calculateSajuMatchEngine(userA, userB) {
-    const detailA = getSajuDetailFromBirth(userA.birth);
-    const detailB = getSajuDetailFromBirth(userB.birth);
+    const detailA = getSajuDetailFromBirth(userA.birth, userA.calendarType || "양력");
+    const detailB = getSajuDetailFromBirth(userB.birth, userB.calendarType || "양력");
 
     const ganA = detailA.dayGan;
     const ganB = detailB.dayGan;
@@ -715,7 +722,7 @@ function renderMatchResult() {
     if (profileEl) {
         profileEl.innerHTML = `
             <div class="partner-profile-card">
-                <h3>${p.emoji ? p.emoji + ' ' : ''}${fullName} 님의 인연등록서</h3>
+                <h3>${fullName} 님의 인연등록서</h3>
                 <b>• 나이:</b> ${p.age}세<br>
                 <b>• 학과:</b> ${p.dept}<br>
                 <b>• 사주 오행:</b> ${p.element || '오행미정'}<br>
@@ -819,7 +826,7 @@ async function renderAdminData() {
                 html += `
                     <div class="data-item">
                         <div>
-                            <b>${p.emoji ? p.emoji + ' ' : ''}${p.name}</b> ${genderLabel} (${p.age}세, ${p.dept})<br>
+                            <b>${p.name}</b> ${genderLabel} (${p.age}세, ${p.dept})<br>
                             🕒 ${p.birthTime || '시간모름'} | 📍 ${p.birthRegion || '-'}<br>
                             📱 ${p.insta} | 💬 ${p.intro || '-'}<br>
                             🎁 선택상자: ${p.chosenBox || '미선택'} | 💞 매칭상대: ${matchInfo}
@@ -903,11 +910,11 @@ async function searchOfflineTarget() {
 
         resultArea.innerHTML = `
             <div class="partner-profile-card">
-                <h3>${found.emoji ? found.emoji + ' ' : ''}${found.name} 님의 대상자 정보 확인</h3>
+                <h3>${found.name} 님의 대상자 정보 확인</h3>
                 <b>• 생년월일:</b> ${found.birth} (${found.calendarType || '양력'})<br>
                 <b>• 성별:</b> ${found.gender || '미지정'} | <b>태어난 시간:</b> ${found.birthTime || '모름'}<br>
                 <b>• 출생 지역:</b> ${found.birthRegion || '미지정'}<br>
-                <b>• 사주 오행:</b> ${found.element || getSajuDetailFromBirth(found.birth).element}<br>
+                <b>• 사주 오행:</b> ${found.element || getSajuDetailFromBirth(found.birth, found.calendarType || '양력').element}<br>
                 <b>• 소속/정보:</b> ${found.dept || '-'}
             </div>
             ${actionButtonHtml}
@@ -974,7 +981,7 @@ function calculateOfflineCompatibility() {
         calendarType: appCalendarType,
         birthTime: appBirthTime,
         birthRegion: appBirthRegion,
-        element: getSajuDetailFromBirth(appBirth).element
+        element: getSajuDetailFromBirth(appBirth, appCalendarType).element
     };
 
     const target = offlineTargetUser;
