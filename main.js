@@ -626,6 +626,7 @@ async function openBoxList(boxName) {
 }
 
 async function saveAndReset() {
+    if (!userState.chosenBox) userState.chosenBox = "미선택";
     await saveRegistration(userState);
     alert("작성하신 인연 정보가 클라우드 대장에 접수되었습니다. 인연을 기다리는 마음으로 초기 화면으로 이동합니다.");
     location.reload();
