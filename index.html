@@ -33,6 +33,30 @@
             background-size: 20px 20px;
         }
 
+        /* 우측 상단 플로팅 전체화면 버튼 */
+        .fullscreen-btn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 9999;
+            width: auto !important;
+            min-height: auto !important;
+            padding: 7px 12px !important;
+            font-size: 12px !important;
+            background: rgba(90, 62, 54, 0.88);
+            color: #fcf9f2;
+            border: 1px solid #b8a99a;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            margin: 0 !important;
+            letter-spacing: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .fullscreen-btn:hover {
+            background: #3f2a24;
+        }
+
         .container {
             width: 100%;
             max-width: 480px;
@@ -510,6 +534,9 @@
 </head>
 <body>
 
+<!-- 전체화면 토글 버튼 -->
+<button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ 전체화면</button>
+
 <div class="container">
 
     <!-- 1. 메인 화면 -->
@@ -784,7 +811,7 @@
                 </div>
 
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️️ 양력 / 음력</div>
+                    <div class="trad-label">🏵 양력 / 음력</div>
                     <select id="offTargetCalendarType" class="trad-input">
                         <option value="양력">양력</option>
                         <option value="음력">음력</option>
@@ -843,7 +870,7 @@
                 </div>
 
                 <div class="trad-form-row">
-                    <div class="trad-label">🏵️ 성별</div>
+                    <div class="trad-label">🏵 성별</div>
                     <select id="offAppGender" class="trad-input">
                         <option value="">성별 선택</option>
                         <option value="남">남성</option>
@@ -937,7 +964,7 @@
             </div>
 
             <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e8e1d5; margin-bottom: 8px;">
-                ⛰️ <b>토(土 - 땅의 기운)</b><br>
+                ⛰️️ <b>토(土 - 땅의 기운)</b><br>
                 <span style="font-size: 12.5px; color: #4a3b32;">모든 것을 품어 안는 대지의 안정성을 상징합니다. 중심을 잡고 무게감 있게 상대방의 곁을 든든히 지켜주는 포용력 있는 스타일입니다.</span>
             </div>
 
